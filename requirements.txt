@@ -1,0 +1,5 @@
+pony
+urllib3
+urllib3[socks]
+python-telegram-bot
+python-telegram-bot[socks]
