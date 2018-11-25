@@ -2,10 +2,7 @@ import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 from urllib3 import make_headers
-from pony.orm import *
-from pony_starting import *
-
-db = Database()
+from selects import *
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -25,16 +22,6 @@ def start(bot, update):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     update.message.reply_text('Please choose:', reply_markup=reply_markup)
-
-
-@db_session
-def add_user(telegram_id, name):
-    User(telegram_id=telegram_id, name=name)
-
-
-@db_session
-def get_user(telegram_id):
-    return User.get(telegram_id=telegram_id)
 
 
 def button(bot, update):
