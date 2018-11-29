@@ -1,3 +1,4 @@
+#! /usr/bin/python3
 import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
@@ -9,10 +10,10 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-TOKEN = os.getenv(TOKEN)
-PROXY_URL = os.getenv(PROXY_URL)
-PROXY_LOGIN = os.getenv(PROXY_LOGIN)
-PROXY_PASS = os.getenv(PROXY_URL)
+TOKEN = os.getenv("TOKEN")
+PROXY_URL = os.getenv("PROXY_URL")
+PROXY_LOGIN = os.getenv("PROXY_LOGIN")
+PROXY_PASS = os.getenv("PROXY_URL")
 
 
 def start(bot, update):
@@ -20,19 +21,15 @@ def start(bot, update):
                 [InlineKeyboardButton("Add location", callback_data='location')],
                 [InlineKeyboardButton("Add workspace", callback_data='workspace')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
+    add_user_message(update)
     update.message.reply_text('Please choose:', reply_markup=reply_markup)
 
 
 def button(bot, update):
     query = update.callback_query
     from_user = query.from_user
-    print(from_user.id, from_user.full_name)
-    print(query.message.chat_id)
     user = get_user(from_user.id)
-    if user is None:
-        add_user(from_user.id, from_user.full_name)
-    else:
-        print(user.name)
+    print(last_message(user).text)
     if query.data == 'meeting':
         logger.debug('meeting')
     if query.data == 'location':
@@ -67,6 +64,7 @@ def main():
 
     updater.dispatcher.add_handler(CommandHandler('start', start))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
+    updater.dispatcher.add_handler(CallbackQueryHandler(button2))
     updater.dispatcher.add_handler(CommandHandler('help', help))
     updater.dispatcher.add_error_handler(error)
 

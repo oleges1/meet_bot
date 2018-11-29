@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pony.orm import *
 
 
@@ -8,18 +8,41 @@ db = Database()
 class User(db.Entity):
     id = PrimaryKey(int, auto=True)
     telegram_id = Optional(int)
-    name = Optional(str)
-    surname = Optional(str)
+    first_name = Optional(str)
+    last_name = Optional(str, nullable=True)
+    username = Optional(str, nullable=True)
     messages = Set('Message')
     meetings = Set('Meeting')
     workspaces = Set('Workspace')
 
+    @staticmethod
+    def user_from_update(update):
+        from_user = update.message.from_user
+        return User(
+            telegram_id=from_user.id,
+            first_name=from_user.first_name,
+            last_name=from_user.last_name,
+            username=from_user.username
+        )
+
 
 class Message(db.Entity):
     id = PrimaryKey(int, auto=True)
-    text = Optional(str)
+    text = Optional(str, nullable=True)
     user = Required(User)
-    time = Optional(datetime)
+    time = Optional(datetime, default=lambda: datetime.now())
+
+    @staticmethod
+    def message_from_update(update, user):
+        return Message(
+            user=user,
+            text=update.message.text
+        )
+
+    @staticmethod
+    def last_message(user):
+        return list(Message.select(lambda message:
+                                   message.user == user).order_by(lambda message: desc(message.id)))[0]
 
 
 class Workspace(db.Entity):
