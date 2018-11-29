@@ -12,19 +12,15 @@ logger = logging.getLogger(__name__)
 TOKEN = os.getenv(TOKEN)
 PROXY_URL = os.getenv(PROXY_URL)
 PROXY_LOGIN = os.getenv(PROXY_LOGIN)
-PROXY_PASS = os.getenv(PROXY_PASS)
+PROXY_PASS = os.getenv(PROXY_URL)
 
 
 def start(bot, update):
     keyboard = [[InlineKeyboardButton("Add meeting", callback_data='meeting')],
                 [InlineKeyboardButton("Add location", callback_data='location')],
                 [InlineKeyboardButton("Add workspace", callback_data='workspace')]]
-
-
-o
-reply_markup = InlineKeyboardMarkup(keyboard)
-
-update.message.reply_text('Please choose:', reply_markup=reply_markup)
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text('Please choose:', reply_markup=reply_markup)
 
 
 def button(bot, update):
