@@ -3,15 +3,16 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 from urllib3 import make_headers
 from selects import *
+import os
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-TOKEN = "769890151:AAHGj9McKnhu29jJo7JaqO4Dbl0GNfRIxBk"
-PROXY_URL = 'socks5://phobos.public.opennetwork.cc:1090/'
-PROXY_LOGIN = '221688370'
-PROXY_PASS = 'eljPzMJu'
+TOKEN = os.getenv(TOKEN)
+PROXY_URL = os.getenv(PROXY_URL)
+PROXY_LOGIN = os.getenv(PROXY_LOGIN)
+PROXY_PASS = os.getenv(PROXY_PASS)
 
 
 def start(bot, update):
@@ -19,9 +20,11 @@ def start(bot, update):
                 [InlineKeyboardButton("Add location", callback_data='location')],
                 [InlineKeyboardButton("Add workspace", callback_data='workspace')]]
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
 
-    update.message.reply_text('Please choose:', reply_markup=reply_markup)
+o
+reply_markup = InlineKeyboardMarkup(keyboard)
+
+update.message.reply_text('Please choose:', reply_markup=reply_markup)
 
 
 def button(bot, update):
