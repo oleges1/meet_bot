@@ -14,6 +14,16 @@ def add_user_message(update):
 
 
 @db_session
+def create_message(user, text):
+    if isinstance(user, str):
+        user = get_user(user)
+    return Message(
+        user=user,
+        text=update.message.text
+    )
+
+
+@db_session
 def get_user(telegram_id):
     return User.get(telegram_id=telegram_id)
 
