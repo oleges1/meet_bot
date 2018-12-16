@@ -49,10 +49,10 @@ class Workspace(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Optional(str)
     users = Set(User)
-    places = Set('Place')
+    locations = Set('Location')
 
 
-class Place(db.Entity):
+class Location(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Optional(str)
     meetings = Set('Meeting')
@@ -63,7 +63,7 @@ class Meeting(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Optional(str)
     users = Set(User)
-    place = Required(Place)
+    location = Required(Location)
     start_time = Optional(datetime)
     end_time = Optional(datetime)
 

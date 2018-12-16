@@ -3,15 +3,22 @@ import logging
 import os
 from urllib3 import make_headers
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, InputTextMessageContent,
-                        ReplyKeyboardMarkup, ReplyKeyboardRemove)
+                      ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, CallbackQueryHandler,
-                            Filters, RegexHandler, ConversationHandler)
-from selects import *
+                          Filters, RegexHandler, ConversationHandler)
+
 from bot.my_meetings import *
 from bot.add_meeting import *
 from bot.add_workspace import *
 from bot.add_location import *
 from bot.states import *
+
+import os
+
+TOKEN = os.getenv("TOKEN")
+PROXY_URL = os.getenv("PROXY_URL")
+PROXY_LOGIN = os.getenv("PROXY_LOGIN")
+PROXY_PASS = os.getenv("PROXY_URL")
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -62,7 +69,8 @@ def main():
                      RegexHandler('^(Add meeting)$', add_meeting),
                      RegexHandler('^(Add workspace)$', add_workspace),
                      RegexHandler('^(Add location)$', add_location),
-                     RegexHandler('^((?!(My meetings)|(Add meeting)|(Add workspace)|(Add location)).)*$', start)
+                     RegexHandler(
+                         '^((?!(My meetings)|(Add meeting)|(Add workspace)|(Add location)).)*$', start)
                      ]
         },
 

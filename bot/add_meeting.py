@@ -4,9 +4,9 @@ import os
 
 from urllib3 import make_headers
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, InputTextMessageContent,
-                        ReplyKeyboardMarkup, ReplyKeyboardRemove)
+                      ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, CallbackQueryHandler,
-                            Filters, RegexHandler, ConversationHandler)
+                          Filters, RegexHandler, ConversationHandler)
 
 from selects import *
 from bot.states import *
@@ -14,6 +14,7 @@ from bot.states import *
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 def add_meeting(bot, update):
     user = update.message.from_user
@@ -27,7 +28,8 @@ def add_meeting(bot, update):
 
 def add_user_to_meeting(bot, update):
     user = update.message.from_user
-    logger.info("add user to meeting: from %s, added %s", user.first_name, update.message.text)
+    logger.info("add user to meeting: from %s, added %s",
+                user.first_name, update.message.text)
 
     add_user_message(update)
     update.message.reply_text('Press /done if you are, else type another @name')
@@ -41,7 +43,7 @@ def add_workspace_to_meeting(bot, update):
 
     add_user_message(update)
     update.message.reply_text('Great! Now I need to know workspace!')
-    
+
     return MEETING_WORKSPACE
 
 
@@ -51,7 +53,7 @@ def add_location_to_meeting(bot, update):
 
     add_user_message(update)
     update.message.reply_text('Great! Now I need to know location!')
-    
+
     return MEETING_LOCATION
 
 

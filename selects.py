@@ -34,8 +34,8 @@ def get_workspace(name):
 
 
 @db_session
-def get_place(name):
-    return Place.get(name=name)
+def get_location(name):
+    return Location.get(name=name)
 
 
 @db_session
@@ -46,10 +46,10 @@ def last_message(user):
 
 
 @db_session
-def add_place_to_wokspace(place, workspace):
-    if isinstance(place, str):
-        place = get_place(place)
-    workspace.places.add(place)
+def add_location_to_wokspace(location, workspace):
+    if isinstance(location, str):
+        location = get_location(location)
+    workspace.locations.add(location)
 
 
 @db_session
