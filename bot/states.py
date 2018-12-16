@@ -11,6 +11,8 @@
     , MEETING_WORKSPACE
     , MEETING_LOCATION
     , MEETING_START
-    ) = range(13)
+    , DELETING
+    , DELETING_CONFIRMATION
+    ) = range(15)
 
 end_command = "/done"
