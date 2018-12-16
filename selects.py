@@ -29,8 +29,20 @@ def get_user(telegram_id):
 
 
 @db_session
+def get_or_create_user(telegram_id):
+    temp_workspace = get_user(telegram_id)
+    return temp_workspace if temp_workspace is not None else User(telegram_id=telegram_id)
+
+
+@db_session
 def get_workspace(name):
     return Workspace.get(name=name)
+
+
+@db_session
+def get_or_create_workspace(name):
+    temp_workspace = get_workspace(name)
+    return temp_workspace if temp_workspace is not None else Workspace(name=name)
 
 
 @db_session
@@ -54,17 +66,17 @@ def add_location_to_wokspace(location, workspace):
 
 @db_session
 def add_user_to_workspace(user, workspace):
-    if isinstance(user, str):
-        user = get_user(user)
-    if isinstance(workspace, str):
-        workspace = get_workspace(workspace)
+    if not isinstance(user, User):
+        user = get_or_create_user(user)
+    if not isinstance(workspace, Workspace):
+        workspace = get_or_create_workspace(workspace)
     workspace.users.add(user)
 
 
 @db_session
 def add_workspace_to_user(user, workspace):
-    if isinstance(user, str):
-        user = get_user(user)
-    if isinstance(workspace, str):
-        workspace = get_workspace(workspace)
+    if not isinstance(user, User):
+        user = get_or_create_user(user)
+    if not isinstance(workspace, Workspace):
+        workspace = get_or_create_workspace(workspace)
     user.workspaces.add(workspace)

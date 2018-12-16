@@ -26,7 +26,11 @@ def add_workspace(bot, update):
 
 def added_workspace(bot, update):
     user = update.message.from_user
-    logger.info("workspace %s added for %s", update.message.text, user.first_name)
+    logger.info("workspace %s adding for %s", update.message.text, user.first_name)
+
+    add_user_to_workspace(user.id, update.message.text.lower().strip())
+    add_workspace_to_user(user.id, update.message.text.lower().strip())
+
     update.message.reply_text(
         'Great! Now you can hold meetings at %s' % update.message.text)
 
