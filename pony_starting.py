@@ -36,11 +36,13 @@ class Message(db.Entity):
     def message_from_update(update, user):
         return Message(
             user=user,
-            text=update.message.text
+            text=update.message.text.lower().strip()
         )
 
     @staticmethod
     def last_message(user):
+        if not isinstance(user, User):
+            raise ValueError('User should be instance of class User')
         return list(Message.select(lambda message:
                                    message.user == user).order_by(lambda message: desc(message.id)))[0]
 

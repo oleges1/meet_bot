@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 def add_location(bot, update):
     user = update.message.from_user
+    add_user_message(update)
     logger.info("adding location for %s", user.first_name)
     update.message.reply_text(
         'Okay, let\'s see... Tell me the name of workspace in which new location is .. hm.. located!')
@@ -26,6 +27,8 @@ def add_location(bot, update):
 
 def add_location_name(bot, update):
     user = update.message.from_user
+    add_user_message(update)
+
     logger.info("adding location for workspace %s added for %s",
                 update.message.text, user.first_name)
 
@@ -35,9 +38,23 @@ def add_location_name(bot, update):
 
 def added_location(bot, update):
     user = update.message.from_user
-    logger.info("location %s added for %s", update.message.text, user.first_name)
-    update.message.reply_text(
-        'Great! Now you can hold meetings at %s' % update.message.text)
+
+    workspace_name = last_message(user.id).text
+    add_user_message(update)
+
+    logger.info("location %s adding for %s", update.message.text, user.first_name)
+
+    workspace = get_workspace(workspace_name)
+    if workspace is None:
+        workspace = get_or_create_workspace(workspace_name)
+        add_location_to_workspace(update.message.text.lower().strip(), workspace.id)
+        update.message.reply_text(
+            f'Great! Now you can hold meetings at {update.message.text} in new created workspace {workspace_name}')
+
+    else:
+        add_location_to_workspace(update.message.text.lower().strip(), workspace.id)
+        update.message.reply_text(
+            f'Great! Now you can hold meetings at {update.message.text} in workspace {workspace_name}')
 
     reply_keyboard = [['My meetings', 'Add meeting'],
                       ['Add workspace', 'Add location']]

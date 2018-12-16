@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 def add_workspace(bot, update):
     user = update.message.from_user
+    add_user_message(update)
     logger.info("adding workspace for %s", user.first_name)
     update.message.reply_text(
         'Okay, let\'s see... Tell me the name of workspace you want to join!')
@@ -26,6 +27,7 @@ def add_workspace(bot, update):
 
 def added_workspace(bot, update):
     user = update.message.from_user
+    add_user_message(update)
     logger.info("workspace %s adding for %s", update.message.text, user.first_name)
 
     add_user_to_workspace(user.id, update.message.text.lower().strip())

@@ -14,16 +14,6 @@ def add_user_message(update):
 
 
 @db_session
-def create_message(user, text):
-    if isinstance(user, str):
-        user = get_user(user)
-    return Message(
-        user=user,
-        text=update.message.text
-    )
-
-
-@db_session
 def get_user(telegram_id):
     return User.get(telegram_id=telegram_id)
 
@@ -32,6 +22,16 @@ def get_user(telegram_id):
 def get_or_create_user(telegram_id):
     temp_workspace = get_user(telegram_id)
     return temp_workspace if temp_workspace is not None else User(telegram_id=telegram_id)
+
+
+@db_session
+def create_message(user, text):
+    if not isinstance(user, User):
+        user = get_user(user)
+    return Message(
+        user=user,
+        text=update.message.text.lower().strip()
+    )
 
 
 @db_session
@@ -46,21 +46,32 @@ def get_or_create_workspace(name):
 
 
 @db_session
-def get_location(name):
-    return Location.get(name=name)
+def get_location(name, workspace):
+    return Location.get(name=name, workspace=workspace)
+
+
+@db_session
+def create_location(name, workspace):
+    print(workspace, name)
+    return Location(
+        workspace=workspace,
+        name=name
+    )
 
 
 @db_session
 def last_message(user):
-    if isinstance(user, str):
+    if not isinstance(user, User):
         user = get_user(user)
+    if user is None:
+        raise ValueError('no such user')
     return Message.last_message(user)
 
 
 @db_session
-def add_location_to_wokspace(location, workspace):
-    if isinstance(location, str):
-        location = get_location(location)
+def add_location_to_workspace(location, workspace_id):
+    workspace = Workspace.get(id=workspace_id)
+    location = create_location(location, workspace)
     workspace.locations.add(location)
 
 

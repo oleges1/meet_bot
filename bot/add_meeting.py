@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 def add_meeting(bot, update):
     user = update.message.from_user
+    add_user_message(update)
     logger.info("meeting of %s: %s", user.first_name, update.message.text)
 
     add_user_message(update)
@@ -28,6 +29,7 @@ def add_meeting(bot, update):
 
 def add_user_to_meeting(bot, update):
     user = update.message.from_user
+    add_user_message(update)
     logger.info("add user to meeting: from %s, added %s",
                 user.first_name, update.message.text)
 
@@ -39,6 +41,7 @@ def add_user_to_meeting(bot, update):
 
 def add_workspace_to_meeting(bot, update):
     user = update.message.from_user
+    add_user_message(update)
     logger.info("updated users list for %s", user.first_name)
 
     add_user_message(update)
