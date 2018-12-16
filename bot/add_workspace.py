@@ -25,7 +25,7 @@ def add_workspace(bot, update):
 
 def added_workspace(bot, update):
     user = update.message.from_user
-    exist = True# check if workspace exist
+    exist = True # check if workspace exist
     if exist:
         accessable = True # check if user has access to workspace
         if accessable:
