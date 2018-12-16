@@ -18,21 +18,34 @@ logger = logging.getLogger(__name__)
 
 def add_location(bot, update):
     user = update.message.from_user
-    logger.info("adding location for %s", user.first_name)
+    logger.info("user %s. adding new location to db", user.first_name)
     update.message.reply_text('Okay, let\'s see... Tell me the name of workspace in which new location is .. hm.. located!')
     return LOCATION
 
 
 def add_location_name(bot, update):
     user = update.message.from_user
-    logger.info("adding location for workspace %s added for %s", update.message.text, user.first_name)
-    update.message.reply_text('Great! Now tell me the name of your location!')
-    return LOCATION_NAME
+    exist = True # check if workspace exist
+    if exist:
+        logger.info("user %s. adding location for workspace %s", user.first_name, update.message.text)
+        update.message.reply_text('Great! Now tell me the name of your location!')
+        return LOCATION_NAME
+    else:
+        logger.info("user %s. adding location for non-existing workspace %s", user.first_name, update.message.text)
+        update.message.reply_text('Sorry, mate. I don\'t know this workspace.\
+            Please, create one in the main menu and try again.')
+
+        reply_keyboard = [['My meetings', 'Add meeting'],
+                          ['Add workspace', 'Add location']]
+        reply_markup = ReplyKeyboardMarkup(reply_keyboard)
+        update.message.reply_text('Please choose:', reply_markup=reply_markup)
+        return ACTION
 
 
 def added_location(bot, update):
     user = update.message.from_user
-    logger.info("location %s added for %s", update.message.text, user.first_name)
+    logger.info("user %s. location %s added.", user.first_name, update.message.text)
+    # create location
     update.message.reply_text('Great! Now you can hold meetings at %s' % update.message.text)
 
     reply_keyboard = [['My meetings', 'Add meeting'],

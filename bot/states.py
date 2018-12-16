@@ -13,12 +13,13 @@ PROXY_PASS = os.getenv("PROXY_URL")
     , WORKSPACE
     , WORKSPACE_ADDED
     , MEETING
+    , TIME_SLOT
     , MEETING_USERS
     , MEETING_WORKSPACE
     , MEETING_LOCATION
     , MEETING_START
     , MEETING_END
     , MEETING_ADDED
-    ) = range(14)
+    ) = range(15)
 
 end_command = "/done"
