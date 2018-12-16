@@ -95,6 +95,7 @@ def added_meeting(bot, update):
     exist = True # check if location exist
     if not exist:
         # create location
+        pass
 
     add_user_message(update)
     update.message.reply_text('Great! New meeting is added to your schedule.')
