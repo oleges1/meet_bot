@@ -4,9 +4,9 @@ import os
 
 from urllib3 import make_headers
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, InputTextMessageContent,
-                        ReplyKeyboardMarkup, ReplyKeyboardRemove)
+                      ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, CallbackQueryHandler,
-                            Filters, RegexHandler, ConversationHandler)
+                          Filters, RegexHandler, ConversationHandler)
 
 from selects import *
 from bot.states import *
@@ -20,6 +20,7 @@ participants = list()
 time = [None, None]
 location = None
 workspace = None
+
 
 def list_of_meetings(bot, update):
     user = update.message.from_user
@@ -40,6 +41,7 @@ def list_of_meetings(bot, update):
         'Do you need to apply a filter for your meetings?', reply_markup=reply_markup)
     return LIST_OF_MEETINGS
 
+
 def filter_by_participants_get(bot, update):
     user = update.message.from_user
     add_user_message(update)
@@ -53,7 +55,8 @@ def filter_by_participants_apply(bot, update):
     user = update.message.from_user
     usernames = update.message.text.lower().strip().split()
     add_user_message(update)
-    logger.info("got participants to filter on from %s: %s", user.first_name, update.message.text)
+    logger.info("got participants to filter on from %s: %s",
+                user.first_name, update.message.text)
 
     global participants
     participants = []
@@ -134,7 +137,8 @@ def filter_by_location_get(bot, update):
     logger.info("required filter by location from %s", user.first_name)
     global workspace
     if workspace == None:
-        update.message.reply_text('Before filtering by location, please, filter by workspace!')
+        update.message.reply_text(
+            'Before filtering by location, please, filter by workspace!')
         reply_keyboard = [['No Filter'],
                           ['Filter by time from', 'Filter by time to'],
                           ['Filter by location', 'Filter by workspace'],
@@ -172,6 +176,7 @@ def filter_by_workspace_get(bot, update):
         'Send workspace at which meeting could held')
     return LIST_WORKSPACE
 
+
 def filter_by_workspace_apply(bot, update):
     user = update.message.from_user
     global workspace
@@ -187,12 +192,61 @@ def filter_by_workspace_apply(bot, update):
         'Do you need to apply another filter?', reply_markup=reply_markup)
     return LIST_OF_MEETINGS
 
+
 def get_filtered(bot, update):
     user = update.message.from_user
     global participants, time, location, workspace
     with db_session:
-        update.message.reply_text(format_filtered(filter(user, time[0], time[1], location, workspace, participants)))
+        dt_start, dt_end = time[0], time[1]
+        if dt_start is None:
+            dt_start = dt_parser.parse('1999-01-01 00:00')
+        if dt_end is None:
+            dt_end = dt_parser.parse('2030-01-01 00:00')
+        filtered = None
+        if workspace is not None:
+            if location is None:
+                if not isinstance(workspace, Workspace):
+                    workspace_item = get_workspace(workspace)
+                if workspace_item is not None:
+                    if filtered is None:
+                        filtered = meet_ids_workspace_in_time(
+                            workspace_item, dt_start, dt_end)
+                    else:
+                        filtered = filtered.intersection(
+                            meet_ids_workspace_in_time(workspace_item, dt_start, dt_end))
+                else:
+                    update.message.reply_text(
+                        f'I don\'t know such workspace: {workspace}')
+            else:
+                if not isinstance(location, Location):
+                    location_item = get_location(location, workspace)
+                if location_item is not None:
+                    if filtered is None:
+                        filtered = meet_ids_location_in_time(
+                            location_item, dt_start, dt_end)
+                    else:
+                        filtered = filtered.intersection(
+                            meet_ids_location_in_time(location_item, dt_start, dt_end))
+                else:
+                    update.message.reply_text(
+                        f'I don\'t know such location: {location} in workspace: {workspace}')
+        if users is not None:
+            for username in participants:
+                if not isinstance(user, User):
+                    username = username[1:] if username.startswith('@') else username
+                    user = get_user_by_username(username)
+                if user is not None:
+                    if filtered is None:
+                        filtered = meet_ids_user_in_time(user, dt_start, dt_end)
+                    else:
+                        filtered = filtered.intersection(
+                            meet_ids_user_in_time(user, dt_start, dt_end))
+                else:
+                    update.message.reply_text(
+                        f'I don\'t know such username: {username}')
+        update.message.reply_text(format_filtered([Meeting[id] for id in filtered]))
     update.message.reply_text('Your filters cleared.')
+
 
 def make_list_of_users(users):
     res = ''
@@ -213,7 +267,7 @@ def format_filtered(meetings):
 
 
 list_of_meetings_states = {
-    LIST_OF_MEETINGS : [
+    LIST_OF_MEETINGS: [
         RegexHandler('^(Filter by participants)$', filter_by_participants_get),
         RegexHandler('^(Filter by time from)$', filter_by_time_from_get),
         RegexHandler('^(Filter by time to)$', filter_by_time_to_get),
@@ -222,9 +276,9 @@ list_of_meetings_states = {
         RegexHandler('^((No Filter)|(No, get meetings))$', get_filtered),
         MessageHandler(Filters.text, list_of_meetings)
     ],
-    LIST_PARTICIPANTS : [MessageHandler(Filters.text, filter_by_participants_apply)],
-    LIST_TIME_FROM : [MessageHandler(Filters.text, filter_by_time_from_apply)],
-    LIST_TIME_TO : [MessageHandler(Filters.text, filter_by_time_to_apply)],
-    LIST_LOCATION : [MessageHandler(Filters.text, filter_by_location_apply)],
-    LIST_WORKSPACE : [MessageHandler(Filters.text, filter_by_workspace_apply)],
+    LIST_PARTICIPANTS: [MessageHandler(Filters.text, filter_by_participants_apply)],
+    LIST_TIME_FROM: [MessageHandler(Filters.text, filter_by_time_from_apply)],
+    LIST_TIME_TO: [MessageHandler(Filters.text, filter_by_time_to_apply)],
+    LIST_LOCATION: [MessageHandler(Filters.text, filter_by_location_apply)],
+    LIST_WORKSPACE: [MessageHandler(Filters.text, filter_by_workspace_apply)],
 }
