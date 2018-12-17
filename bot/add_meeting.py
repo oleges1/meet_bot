@@ -10,7 +10,8 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, CallbackQuery
 
 from selects import *
 from bot.states import *
-import dateutil
+from dateutil import parser as dt_parser
+import traceback
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -50,7 +51,15 @@ def add_user_to_meeting(bot, update):
         logger.info(f"add user to meeting: from {from_user.username}, added {username}")
         timeslots = get_users_timeslots(username)
         if timeslots is not None:
-            update.message.reply_text(f'today user {username} is busy in:' + timeslots)
+            if len(timeslots) > 0:
+                update.message.reply_text(
+                    f'Today user {username} is busy in:' + timeslots)
+            else:
+                update.message.reply_text(
+                    f'Today user {username} is free')
+        else:
+            update.message.reply_text(
+                f'No such user {username} in my base, so you can hold meetings with him, but he will not get any information about it')
     update.message.reply_text('Press /done if you are, else type another @name')
     return MEETING_USERS
 
@@ -81,8 +90,12 @@ def add_start_to_meeting(bot, update):
     add_user_message(update)
     timeslots = get_location_timeslots(update.message.text.lower().strip(), workspace)
     if timeslots is not None:
-        update.message.reply_text(
-            f'Today location {update.message.text} is busy in:' + timeslots)
+        if len(timeslots) > 0:
+            update.message.reply_text(
+                f'Today location {update.message.text} is busy in:' + timeslots)
+        else:
+            update.message.reply_text(
+                f'Today location {update.message.text} is free')
         update.message.reply_text('Great! Now I need to know start time!')
         return MEETING_START
     else:
@@ -105,14 +118,24 @@ def add_end_to_meeting(bot, update):
 
 def end_adding_meeting(bot, update):
     from_user = update.message.from_user
-    logger.info("updated end_time for %s: %s", user.first_name, update.message.text)
+    logger.info("updated end_time for %s: %s", from_user.first_name, update.message.text)
     add_user_message(update)
     name, users, workspace, location, start_time, end_time = last_messages(
-        from_user, count=6)
-    start_time = dateutil.parser.parse(start_time)
-    end_time = dateutil.parser.parse(end_time)
+        from_user.id, count=6)[::-1]
+    try:
+        start_time = dt_parser.parse(start_time.text)
+        end_time = dt_parser.parse(end_time.text)
+    except ValueError:
+        del_message(start_time.id)
+        del_message(end_time.id)
+        traceback.print_exc()
+        update.message.reply_text(
+            'I could not parse your start or end time! Now I need to know start time!')
+        return MEETING_START
+    users = users.text.split()
+    # print(name.text, users, workspace.text, location.text, start_time, end_time)
     meeting, user_ids = add_meeting_to_base(
-        name, users, workspace, location, start_time, end_time)
+        name.text, users, workspace.text, location.text, start_time, end_time)
     if meeting is not None:
         for user_id in user_ids:
             bot.send_message(

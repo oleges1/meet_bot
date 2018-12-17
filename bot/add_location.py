@@ -29,7 +29,7 @@ def add_location_name(bot, update):
     user = update.message.from_user
     add_user_message(update)
 
-    workspace_name = update.message.text
+    workspace_name = update.message.text.lower().strip()
     workspace = get_workspace(workspace_name)
     if workspace is not None:
         logger.info("user %s. adding location for workspace %s",

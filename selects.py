@@ -7,8 +7,8 @@ def add_user_message(update):
     user = User.get(telegram_id=update.message.from_user.id)
     if user is None:
         user = User.user_from_update(update)
-        # user = User.get(telegram_id=update.message.from_user.id)
     message = Message.message_from_update(update, user)
+    user.messages.add(message)
     return user, message
 
 
@@ -17,12 +17,22 @@ def add_user_message_text(update, text):
     user = User.get(telegram_id=update.message.from_user.id)
     if user is None:
         user = User.user_from_update(update)
-        # user = User.get(telegram_id=update.message.from_user.id)
     message = Message(
         user=user,
         text=text
     )
+    user.messages.add(message)
     return user, message
+
+
+@db_session
+def del_message(id):
+    mes = Message.get(id=id)
+    user = mes.user
+    messages_from_user = user.messages
+    messages_from_user.remove(id)
+    user.set(messages=messages_from_user)
+    Message[id].delete()
 
 
 @db_session
@@ -136,16 +146,16 @@ def add_workspace_to_user(user, workspace):
 def user_busy(user, dt=datetime.now()):
     if not isinstance(user, User):
         raise ValueError('User should be instance of class User')
-    return select((meet.start_time, meet.end_time) for meet in Meeting
-                  if meet.user == user and meet.start_time.date() == dt.date())
+    return list(select((meet.start_time, meet.end_time) for meet in Meeting
+                       if meet.user == user and meet.start_time.date() == dt.date()))
 
 
 @db_session
-def location_busy(user, dt=datetime.now()):
+def location_busy(location, dt=datetime.now()):
     if not isinstance(location, Location):
         raise ValueError('Location should be instance of class Location')
-    return select((meet.start_time, meet.end_time) for meet in Meeting
-                  if meet.location == location and meet.start_time.date() == dt.date())
+    return list(select((meet.start_time, meet.end_time) for meet in Meeting
+                       if meet.location == location and meet.start_time.date() == dt.date()))
 
 
 @db_session
@@ -198,12 +208,12 @@ def check_user_busy(user, start_time, end_time):
 
 @db_session
 def add_meeting_to_base(name, users, workspace, location, start_time, end_time):
-    loc = get_location(name, workspace)
+    loc = get_location(location, workspace)
     if check_location_busy(loc, start_time, end_time):
         return None, None
     meet = Meeting(
-        name=name,
         location=loc,
+        name=name,
         start_time=start_time,
         end_time=end_time
     )
