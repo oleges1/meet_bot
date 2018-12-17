@@ -58,6 +58,7 @@ def add_user_to_meeting(bot, update):
         add_user_message_text(update, 'users ' + update.message.text.lower().strip())
     for username in users:
         logger.info(f"add user to meeting: from {from_user.username}, added {username}")
+        username = username[1:] if username.startswith('@') else username
         timeslots = get_users_timeslots(username)
         if timeslots is not None:
             if len(timeslots) > 0:

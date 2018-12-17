@@ -127,7 +127,9 @@ def add_location_to_workspace(location, workspace_id):
 @db_session
 def add_user_to_workspace(user, workspace):
     if not isinstance(user, User):
-        user = get_or_create_user(user)
+        user = get_user(user)
+        if user is None:
+            raise ValueError('user is None')
     if not isinstance(workspace, Workspace):
         workspace = get_or_create_workspace(workspace)
     workspace.users.add(user)
@@ -136,7 +138,9 @@ def add_user_to_workspace(user, workspace):
 @db_session
 def add_workspace_to_user(user, workspace):
     if not isinstance(user, User):
-        user = get_or_create_user(user)
+        user = get_user(user)
+        if user is None:
+            raise ValueError('user is None')
     if not isinstance(workspace, Workspace):
         workspace = get_or_create_workspace(workspace)
     user.workspaces.add(workspace)
@@ -147,7 +151,7 @@ def user_busy(user, dt=datetime.now()):
     if not isinstance(user, User):
         raise ValueError('User should be instance of class User')
     return list(select((meet.start_time, meet.end_time) for meet in Meeting
-                       if meet.user == user and meet.start_time.date() == dt.date()))
+                       if user in meet.users and meet.start_time.date() == dt.date()))
 
 
 @db_session
