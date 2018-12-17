@@ -82,11 +82,12 @@ def add_workspace_to_meeting(bot, update):
     users = [user[1:] if user.startswith('@') else user for user in users]
     users.append(from_user.username)
     update_user_message_text(update, ' '.join(list(set(users))))
-    update.message.reply_text('Great! Now I need to know workspace!')
+    update.message.reply_text(
+        'Great! Now I need to know workspace! \nTo add new one press /cancel, and then "Add Workspace"')
     items = ''
     for i, wspace in enumerate(most_popular_workspaces()):
-        items += f'{i}. {wspace.name} \n '
-    update.message.reply_text(f'Most popular now are: \n {items}')
+        items += f'{i + 1}. {wspace.name} \n '
+    update.message.reply_text(f'Most popular workspaces now are: \n {items}')
     return MEETING_WORKSPACE
 
 
@@ -95,11 +96,12 @@ def add_location_to_meeting(bot, update):
     logger.info("updated workspace for %s: %s", user.first_name, update.message.text)
     add_user_message(update)
     wspace = last_message(user.id).text
-    update.message.reply_text('Great! Now I need to know location!')
+    update.message.reply_text(
+        'Great! Now I need to know location! \nTo add new one press /cancel, and then "Add Location"')
     items = ''
     for i, loc in enumerate(most_popular_locations(wspace)):
-        items += f'{i}. {loc.name} \n '
-    update.message.reply_text(f'Most popular now are: \n {items}')
+        items += f'{i + 1}. {loc.name} \n '
+    update.message.reply_text(f'Most popular locations in {wspace} now are: \n {items}')
     return MEETING_LOCATION
 
 
