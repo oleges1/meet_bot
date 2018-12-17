@@ -35,7 +35,8 @@ def list_of_meetings(bot, update):
     reply_keyboard = [['No Filter'],
                       ['Filter by time from', 'Filter by time to'],
                       ['Filter by location', 'Filter by workspace'],
-                      ['Filter by participants']]
+                      ['Filter by participants'],
+                      ['Back to main menu']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text(
         'Do you need to apply a filter for your meetings?', reply_markup=reply_markup)
@@ -251,7 +252,17 @@ def get_filtered(bot, update):
         else:
             update.message.reply_text('nothing found')
     update.message.reply_text('Your filters cleared.')
-    return LIST_OF_MEETINGS
+    return list_of_meetings(bot, update)
+
+
+def back_to_main_menu(bot, update):
+    reply_keyboard = [['My meetings', 'Add meeting'],
+                      ['Add workspace', 'Add location'],
+                      ['Cancel meeting']]
+    reply_markup = ReplyKeyboardMarkup(reply_keyboard)
+    add_user_message(update)
+    update.message.reply_text('Please choose:', reply_markup=reply_markup)
+    return ACTION
 
 
 def make_list_of_users(users):
@@ -279,6 +290,7 @@ list_of_meetings_states = {
         RegexHandler('^(Filter by time to)$', filter_by_time_to_get),
         RegexHandler('^(Filter by location)$', filter_by_location_get),
         RegexHandler('^(Filter by workspace)$', filter_by_workspace_get),
+        RegexHandler('^(Back to main menu)$', back_to_main_menu),
         RegexHandler('^((No Filter)|(No, get meetings))$', get_filtered),
         MessageHandler(Filters.text, list_of_meetings)
     ],
