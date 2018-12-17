@@ -80,7 +80,7 @@ def main():
         fallbacks=[CommandHandler('cancel', cancel),
                    CommandHandler('help', help)]
     )
-    # conv_handler.states.update(list_of_meetings_states)
+    conv_handler.states.update(list_of_meetings_states)
     conv_handler.states.update(workspace_states)
     conv_handler.states.update(cancel_states)
     conv_handler.states.update(meeting_states)
