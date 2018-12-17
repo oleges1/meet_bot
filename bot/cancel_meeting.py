@@ -87,7 +87,7 @@ def deleting_confirmed(bot, update):
     delete_meeting(meeting_id)
     logger.info('user %s. deleting meeting %s', user.first_name, meeting_id)
     update.message.reply_text(
-        'Great. Meeting %s successfully deleted. See you soon!', meeting_id)
+        'Great. Meeting %s successfully deleted. See you soon!' % meeting_id)
 
     reply_keyboard = [['My meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
