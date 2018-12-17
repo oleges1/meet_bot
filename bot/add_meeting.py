@@ -58,8 +58,8 @@ def add_user_to_meeting(bot, update):
 def add_workspace_to_meeting(bot, update):
     from_user = update.message.from_user
     logger.info("updated users list for %s", from_user.first_name)
-    last_mess = last_message(from_user.id)
-    users = last_mess.text[6:].split()
+    last_mess = last_message(from_user.id).text
+    users = last_mess[6:].split()
     users = [user[1:] if user.startswith('@') else user for user in users]
     update_user_message_text(update, ' '.join(users))
     update.message.reply_text('Great! Now I need to know workspace!')
@@ -104,7 +104,6 @@ def add_end_to_meeting(bot, update):
 
 
 def end_adding_meeting(bot, update):
-
     from_user = update.message.from_user
     logger.info("updated end_time for %s: %s", user.first_name, update.message.text)
     add_user_message(update)

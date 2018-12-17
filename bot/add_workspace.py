@@ -28,7 +28,7 @@ def add_workspace(bot, update):
 def added_workspace(bot, update):
     user = update.message.from_user
     add_user_message(update)
-    workspace_name = last_message(user.id).text
+    workspace_name = update.message.text.lower().strip()
     workspace = get_workspace(workspace_name)
     if workspace is not None:
         accessable = True  # check if user has access to workspace
@@ -49,7 +49,8 @@ def added_workspace(bot, update):
         workspace = get_or_create_workspace(workspace_name)
         add_user_to_workspace(user.id, update.message.text.lower().strip())
         add_workspace_to_user(user.id, update.message.text.lower().strip())
-        logger.info("user %s. created workspace %s, added to user %s", user.first_name, update.message.text, user.first_name)
+        logger.info("user %s. created workspace %s, added to user %s",
+                    user.first_name, update.message.text, user.first_name)
         update.message.reply_text('It seems like I don\'t know this workspace. \
             But don\'t worry, now I know! Now you can hold meetings in %s.' % update.message.text)
 
