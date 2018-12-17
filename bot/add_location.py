@@ -42,7 +42,7 @@ def add_location_name(bot, update):
         update.message.reply_text('Sorry, mate. I don\'t know this workspace.\
             Please, create one in the main menu and try again.')
 
-        reply_keyboard = [['My meetings', 'Add meeting'],
+        reply_keyboard = [['Check meetings', 'Add meeting'],
                           ['Add workspace', 'Add location'],
                           ['Cancel meeting']]
         reply_markup = ReplyKeyboardMarkup(reply_keyboard)
@@ -65,7 +65,7 @@ def added_location(bot, update):
             update.message.text, workspace_name
         ))
 
-    reply_keyboard = [['My meetings', 'Add meeting'],
+    reply_keyboard = [['Check meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
                       ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)

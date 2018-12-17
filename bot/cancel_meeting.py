@@ -30,11 +30,11 @@ def cancel_meeting(bot, update, retry=False):
     if retry:
         update.message.reply_text(
             'Let\'s try again. Send me ID of another meeting.\n' +
-            'You can find one in the main menu, "My meetings". Press /cancel and then /start to go there.')
+            'You can find one in the main menu, "Check meetings". Press /cancel and then /start to go there.')
     else:
         update.message.reply_text(
             'So you want to cancel one of your meetings. Okay, just send me its ID.\n' +
-            'You can find it in the main menu, "My meetings". Press /cancel and then /start to go there.')
+            'You can find it in the main menu, "Check meetings". Press /cancel and then /start to go there.')
     return DELETING
 
 
@@ -66,7 +66,7 @@ def confirm_meeting_deleting(bot, update):
                 update.message.reply_text(
                     'Sorry, you are not patricipate in this meeting. You have no rights to delete it.')
 
-                reply_keyboard = [['My meetings', 'Add meeting'],
+                reply_keyboard = [['Check meetings', 'Add meeting'],
                                   ['Add workspace', 'Add location'],
                                   ['Cancel meeting']]
                 reply_markup = ReplyKeyboardMarkup(reply_keyboard)
@@ -89,7 +89,7 @@ def deleting_confirmed(bot, update):
     update.message.reply_text(
         'Great. Meeting %s successfully deleted. See you soon!' % meeting_id)
 
-    reply_keyboard = [['My meetings', 'Add meeting'],
+    reply_keyboard = [['Check meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
                       ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
@@ -105,7 +105,7 @@ def deleting_unconfirmed(bot, update):
     update.message.reply_text(
         'Great. Meeting %s remains stable. See you soon!' % meeting_id)
 
-    reply_keyboard = [['My meetings', 'Add meeting'],
+    reply_keyboard = [['Check meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
                       ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)

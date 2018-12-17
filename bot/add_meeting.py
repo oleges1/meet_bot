@@ -122,7 +122,7 @@ def add_start_to_meeting(bot, update):
         return MEETING_START
     else:
         update.message.reply_text('No such location in this workspace')
-        reply_keyboard = [['My meetings', 'Add meeting'],
+        reply_keyboard = [['Check meetings', 'Add meeting'],
                           ['Add workspace', 'Add location'],
                           ['Cancel meeting']]
         reply_markup = ReplyKeyboardMarkup(reply_keyboard)
@@ -162,12 +162,12 @@ def end_adding_meeting(bot, update):
         for user_id in user_ids:
             if user_id != from_user.id:
                 bot.send_message(
-                    chat_id=user_id, text="You are invited into new meeting with id %s, check it using \"My meetings\" button" % meeting.id)
+                    chat_id=user_id, text="You are invited into new meeting with id %s, check it using \"Check meetings\" button" % meeting.id)
         update.message.reply_text(
             'Great! New meeting with id %s is added to your schedule.' % meeting.id)
     else:
         update.message.reply_text('New meeting creation failed due to someone is busy')
-    reply_keyboard = [['My meetings', 'Add meeting'],
+    reply_keyboard = [['Check meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
                       ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)

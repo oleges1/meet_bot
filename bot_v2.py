@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def start(bot, update):
-    reply_keyboard = [['My meetings', 'Add meeting'],
+    reply_keyboard = [['Check meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
                       ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
@@ -67,13 +67,13 @@ def main():
         entry_points=[CommandHandler('start', start)],
 
         states={
-            ACTION: [RegexHandler('^(My meetings)$', list_of_meetings),
+            ACTION: [RegexHandler('^(Check meetings)$', list_of_meetings),
                      RegexHandler('^(Add meeting)$', add_meeting),
                      RegexHandler('^(Add workspace)$', add_workspace),
                      RegexHandler('^(Add location)$', add_location),
                      RegexHandler('^(Cancel meeting)$', cancel_meeting),
                      RegexHandler(
-                         '^((?!(My meetings)|(Add meeting)|(Add workspace)|(Add location)|(Cancel meeting)).)*$', start)
+                         '^((?!(Check meetings)|(Add meeting)|(Add workspace)|(Add location)|(Cancel meeting)).)*$', start)
                      ]
         },
 

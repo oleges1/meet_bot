@@ -54,7 +54,7 @@ def added_workspace(bot, update):
         update.message.reply_text('It seems like I don\'t know this workspace. \
             But don\'t worry, now I know! Now you can hold meetings in %s.' % update.message.text)
 
-    reply_keyboard = [['My meetings', 'Add meeting'],
+    reply_keyboard = [['Check meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
                       ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)

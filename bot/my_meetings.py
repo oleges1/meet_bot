@@ -253,7 +253,7 @@ def get_filtered(bot, update):
             update.message.reply_text(format_filtered([Meeting[id] for id in filtered]))
         else:
             update.message.reply_text('nothing found')
-    reply_keyboard = [['My meetings', 'Add meeting'],
+    reply_keyboard = [['Check meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
                       ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
