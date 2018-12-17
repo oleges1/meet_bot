@@ -70,7 +70,8 @@ def add_workspace_to_meeting(bot, update):
     last_mess = last_message(from_user.id).text
     users = last_mess[6:].split()
     users = [user[1:] if user.startswith('@') else user for user in users]
-    update_user_message_text(update, ' '.join(users))
+    users.append(from_user.username)
+    update_user_message_text(update, ' '.join(list(set(users))))
     update.message.reply_text('Great! Now I need to know workspace!')
     return MEETING_WORKSPACE
 
