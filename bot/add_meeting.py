@@ -93,7 +93,7 @@ def add_workspace_to_meeting(bot, update):
 def add_location_to_meeting(bot, update):
     user = update.message.from_user
     logger.info("updated workspace for %s: %s", user.first_name, update.message.text)
-    wspace = last_message(from_user.id).text
+    wspace = last_message(user.id).text
     add_user_message(update)
     update.message.reply_text('Great! Now I need to know location!')
     items = ''
