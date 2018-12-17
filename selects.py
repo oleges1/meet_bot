@@ -29,10 +29,10 @@ def add_user_message_text(update, text):
 @db_session
 def del_message(id):
     mes = Message.get(id=id)
-    user = mes.user
-    messages_from_user = user.messages
-    messages_from_user.remove(mes)
-    user.set(messages=messages_from_user)
+    # user = mes.user
+    # messages_from_user = user.messages
+    # messages_from_user.remove(mes)
+    # user.set(messages=messages_from_user)
     mes.delete()
 
 
@@ -184,16 +184,17 @@ def get_location_timeslots(name, workspace):
 @db_session
 def delete_meeting(id):
     meet = Meeting[id]
-    location = meet.location
-    meetings = location.meetings
-    meetings.remove(meet)
-    location.set(meetings=meetings)
-    users = meet.users
-    for user in users:
-        meetings = user.meetings
-        meetings.remove(meet)
-        user.set(meetings=meetings)
     meet.delete()
+    # users = meet.users
+    # location = meet.location
+    # meetings = location.meetings
+    # meetings.remove(meet)
+    # location.set(meetings=meetings)
+    # for user in users:
+    #     meetings = user.meetings
+    #     meetings.remove(meet)
+    #     user.set(meetings=meetings)
+    # meet.delete()
 
 
 @db_session
