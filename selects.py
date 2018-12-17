@@ -76,6 +76,8 @@ def get_or_create_workspace(name):
 def get_location(name, workspace):
     if not isinstance(workspace, Workspace):
         workspace = get_workspace(workspace)
+    if workspace is None:
+        return None
     return Location.get(name=name, workspace=workspace)
 
 
