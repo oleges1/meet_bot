@@ -22,8 +22,8 @@ def convert_timeslots(timeslots):
     res = ''
     for timeslot_pair in timeslots:
         start, end = timeslot_pair
-        res += 'start: ' + start.strftime("%Y-%m-%d %H:%M") + \
-            'end: ' + end.strftime("%Y-%m-%d %H:%M") + '\n'
+        res += 'from: ' + start.strftime("%H:%M") + \
+            ' to: ' + end.strftime("%H:%M") + '\n'
     return res
 
 
@@ -148,8 +148,9 @@ def end_adding_meeting(bot, update):
         name.text, users, workspace.text, location.text, start_time, end_time)
     if meeting is not None:
         for user_id in user_ids:
-            bot.send_message(
-                chat_id=user_id, text="You are invited into new meeting with id %s, check it using \"My meetings\" button" % meeting.id)
+            if user_id != from_user.id:
+                bot.send_message(
+                    chat_id=user_id, text="You are invited into new meeting with id %s, check it using \"My meetings\" button" % meeting.id)
         update.message.reply_text(
             'Great! New meeting with id %s is added to your schedule.' % meeting.id)
     else:
