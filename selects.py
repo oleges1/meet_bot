@@ -276,3 +276,9 @@ def meet_ids_workspace_in_time(workspace, dt_start, dt_end):
     return set(list(select(meet.id for meet in Meeting
                            if meet.location in workspace.locations and
                            (m.start_time < dt_start and dt_end > m.end_time))))
+
+
+@db_session
+def meet_ids_in_time(dt_start, dt_end):
+    return set(list(select(meet.id for meet in Meeting
+                           if m.start_time < dt_start and dt_end > m.end_time)))
