@@ -103,7 +103,7 @@ def deleting_unconfirmed(bot, update):
     meeting_id = 0
     logger.info('user %s. cancel deleting meeting %s', user.first_name, meeting_id)
     update.message.reply_text(
-        'Great. Meeting %s remains stable. See you soon!', meeting_id)
+        'Great. Meeting %s remains stable. See you soon!' % meeting_id)
 
     reply_keyboard = [['My meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
