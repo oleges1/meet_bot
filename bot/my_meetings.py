@@ -197,6 +197,7 @@ def filter_by_workspace_apply(bot, update):
 def get_filtered(bot, update):
     user = update.message.from_user
     global participants, time, location, workspace
+    participants.append(get_user_by_username(user.username))
     with db_session:
         dt_start, dt_end = time[0], time[1]
         if dt_start is None:
