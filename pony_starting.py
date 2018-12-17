@@ -7,8 +7,8 @@ db = Database()
 
 class User(db.Entity):
     id = PrimaryKey(int, auto=True)
-    telegram_id = Optional(int)
-    first_name = Optional(str)
+    telegram_id = Optional(int, nullable=True)
+    first_name = Optional(str, nullable=True)
     last_name = Optional(str, nullable=True)
     username = Optional(str, nullable=True)
     messages = Set('Message')
@@ -40,11 +40,11 @@ class Message(db.Entity):
         )
 
     @staticmethod
-    def last_message(user):
+    def last_messages(user, count=1):
         if not isinstance(user, User):
             raise ValueError('User should be instance of class User')
         return list(Message.select(lambda message:
-                                   message.user == user).order_by(lambda message: desc(message.id)))[0]
+                                   message.user == user).order_by(lambda message: desc(message.id)))[:count]
 
 
 class Workspace(db.Entity):
@@ -68,13 +68,6 @@ class Meeting(db.Entity):
     location = Required(Location)
     start_time = Optional(datetime)
     end_time = Optional(datetime)
-
-    @staticmethod
-    def user_busy(user, dt=datetime.now()):
-        if not isinstance(user, User):
-            raise ValueError('User should be instance of class User')
-        return list(Meeting.select(lambda meeting:
-                                   meeting.user == user).where(start_time.date() == dt.date()))
 
 
 db.bind(provider='sqlite', filename='sql', create_db=True)
