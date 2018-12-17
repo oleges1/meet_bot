@@ -251,9 +251,6 @@ def check_user_in_meeting(username, id):
     return user in meeting.users
 
 
-@db_session
-def filter(user, dt_start=None, dt_end=None, location=None, workspace=None, users=None):
-    if dt_start == None:
 def meet_ids_user_in_time(user, dt_start, dt_end):
     if not isinstance(user, User):
         raise ValueError('User should be instance of class User')
@@ -314,5 +311,4 @@ def filter(user, dt_start=None, dt_end=None, location=None, workspace=None, user
             else:
                 filtered = filtered.intersection(
                     meet_ids_user_in_time(user, dt_start, dt_end))
-    res = [Meeting[id] for id in filtered]
-    return res
+    return [Meeting[id] for id in filtered]
