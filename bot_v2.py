@@ -82,9 +82,9 @@ def main():
     )
     # conv_handler.states.update(list_of_meetings_states)
     conv_handler.states.update(workspace_states)
+    conv_handler.states.update(cancel_states)
     conv_handler.states.update(meeting_states)
     conv_handler.states.update(location_states)
-
     updater.dispatcher.add_handler(conv_handler)
     updater.dispatcher.add_error_handler(error)
 

@@ -141,7 +141,7 @@ def user_busy(user, dt=datetime.now()):
 
 
 @db_session
-def location_busy(user, dt=datetime.now()):
+def location_busy(location, dt=datetime.now()):
     if not isinstance(location, Location):
         raise ValueError('Location should be instance of class Location')
     return select((meet.start_time, meet.end_time) for meet in Meeting

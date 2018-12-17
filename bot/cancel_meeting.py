@@ -104,7 +104,7 @@ def deleting_unconfirmed(bot, update):
     return ACTION
 
 
-workspace_states = {
+cancel_states = {
     DELETING: [MessageHandler(Filters.text, confirm_meeting_deleting)],
     DELETING_CONFIRMATION: [RegexHandler('^(Yes)$', deleting_confirmed),
                             RegexHandler('^(No)$', deleting_unconfirmed)]

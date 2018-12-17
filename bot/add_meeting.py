@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def add_meeting(bot, update):
     user = update.message.from_user
     add_user_message(update)
-    logger.info("meeting of %s: %s", user.first_name, update.message.text)
+    logger.info("user %s. creating meeting: STARTED", user.first_name)
 
     update.message.reply_text('First of all, tell me name of your meeting')
 
@@ -30,7 +30,7 @@ def add_meeting(bot, update):
 def add_name_to_meeting(bot, update):
     user = update.message.from_user
     add_user_message(update)
-    logger.info("add name to meeting: from %s, added %s",
+    logger.info("user %s. creating meeting %s",
                 user.first_name, update.message.text)
     update.message.reply_text('Okey, tell me @names of people')
 
@@ -131,8 +131,8 @@ def end_adding_meeting(bot, update):
 
 
 meeting_states = {
-    MEETING: [MessageHandler(Filters.text, add_user_to_meeting)],
-    MEETING_NAME: [MessageHandler(Filters.text, add_name_to_meeting)],
+    MEETING: [MessageHandler(Filters.text, add_name_to_meeting)],
+    MEETING_NAME: [MessageHandler(Filters.text, add_user_to_meeting)],
     MEETING_USERS: [CommandHandler('done', add_workspace_to_meeting),
                     MessageHandler(Filters.text, add_user_to_meeting)],
     MEETING_WORKSPACE: [MessageHandler(Filters.text, add_location_to_meeting)],

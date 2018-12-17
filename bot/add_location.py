@@ -61,7 +61,9 @@ def added_location(bot, update):
 
     logger.info("user %s. location %s added.", user.first_name, update.message.text)
     update.message.reply_text(
-        'Great! Now you can hold meetings at {update.message.text} in workspace {workspace_name}')
+        'Great! Now you can hold meetings at %s in workspace %s' % (
+            update.message.text, workspace_name
+        ))
 
     reply_keyboard = [['My meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
