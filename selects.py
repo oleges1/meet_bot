@@ -257,7 +257,7 @@ def meet_ids_user_in_time(user, dt_start, dt_end):
         raise ValueError('User should be instance of class User')
     return set(list(select(m.id for m in Meeting
                            if user in m.users and
-                           (m.start_time > dt_start and dt_end < m.end_time))))
+                           (m.start_time > dt_start and dt_end > m.end_time))))
 
 
 @db_session
@@ -266,7 +266,7 @@ def meet_ids_location_in_time(location, dt_start, dt_end):
         raise ValueError('location should be instance of class Location')
     return set(list(select(m.id for m in Meeting
                            if location == m.location and
-                           (m.start_time > dt_start and dt_end < m.end_time))))
+                           (m.start_time > dt_start and dt_end > m.end_time))))
 
 
 @db_session
@@ -275,10 +275,10 @@ def meet_ids_workspace_in_time(workspace, dt_start, dt_end):
         raise ValueError('workspace should be instance of class Workspace')
     return set(list(select(m.id for m in Meeting
                            if m.location in workspace.locations and
-                           (m.start_time > dt_start and dt_end < m.end_time))))
+                           (m.start_time > dt_start and dt_end > m.end_time))))
 
 
 @db_session
 def meet_ids_in_time(dt_start, dt_end):
     return set(list(select(m.id for m in Meeting
-                           if m.start_time > dt_start and dt_end < m.end_time)))
+                           if m.start_time > dt_start and dt_end > m.end_time)))
