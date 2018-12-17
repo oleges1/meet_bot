@@ -1,10 +1,6 @@
 from pony.orm import *
 from pony_starting import *
 from dateutil import parser as dt_parser
-<<<<<<< HEAD
-=======
-
->>>>>>> a12c95b47557a1f25b5ece740ed755b874be4f88
 
 @db_session
 def add_user_message(update):
