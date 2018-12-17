@@ -193,7 +193,7 @@ def get_filtered(bot, update):
     with db_session:
         update.message.reply_text(format_filtered(filter(user, time[0], time[1], location, workspace, participants)))
     update.message.reply_text('Your filters cleared.')
-    return LIST_OF_MEETINGS
+    list_of_meetings(bot, update)
 
 def make_list_of_users(users):
     res = ''
