@@ -61,14 +61,14 @@ def get_or_create_user(telegram_id):
     return temp_workspace if temp_workspace is not None else User(telegram_id=telegram_id)
 
 
-@db_session
-def create_message(user, text):
-    if not isinstance(user, User):
-        user = get_user(user)
-    return Message(
-        user=user,
-        text=update.message.text.lower().strip()
-    )
+# @db_session
+# def create_message(user, text):
+#     if not isinstance(user, User):
+#         user = get_user(user)
+#     return Message(
+#         user=user,
+#         text=update.message.text.lower().strip()
+#     )
 
 
 @db_session
@@ -230,7 +230,7 @@ def add_meeting_to_base(name, users, workspace, location, start_time, end_time):
         if check_user_busy(user, start_time, end_time):
             delete_meeting(meet.id)
             return None, None
-        user_ids.append(user.id)
+        user_ids.append(user.telegram_id)
         user.meetings.add(meet)
         meet.users.add(user)
     return meet, user_ids
