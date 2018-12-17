@@ -69,6 +69,13 @@ class Meeting(db.Entity):
     start_time = Optional(datetime)
     end_time = Optional(datetime)
 
+    @staticmethod
+    def user_busy(user, dt=datetime.now()):
+        if not isinstance(user, User):
+            raise ValueError('User should be instance of class User')
+        return list(Meeting.select(lambda meeting:
+                                   meeting.user == user).where(start_time.date() == dt.date()))
+
 
 db.bind(provider='sqlite', filename='sql', create_db=True)
 db.generate_mapping(create_tables=True)
