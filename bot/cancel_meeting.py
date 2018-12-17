@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 def make_list_of_users(users):
+    res = ''
+    for user in users:
+        res += f'@{user.username} '
+    return res
 
 
 def cancel_meeting(bot, update, retry=False):
@@ -37,42 +41,43 @@ def cancel_meeting(bot, update, retry=False):
 def confirm_meeting_deleting(bot, update):
     user = update.message.from_user
     add_user_message(update)
+    with db_session:
+        text = update.message.text.lower().strip()
+        meeting = get_meeting(text)
+        if meeting is not None:
+            if check_user_in_meeting(user.username, meeting.id):
+                logger.info("user %s. deleting meeting %s.",
+                            user.first_name, update.message.text)
+                update.message.reply_text(
+                    'Hey, do you really want to delete this one? Just to remind...')
+                meeting_info = f'meeting_id: {meeting.id},\n meeting_name: {meeting.name},\n' + \
+                               f'users: {make_list_of_users(meeting.users)},\n location: {meeting.location.name},\n ' + \
+                               f'workspace: {meeting.location.workspace.name}\n ' + \
+                               f'started: {meeting.start_time},\n ended: {meeting.end_time}'
+                update.message.reply_text(meeting_info)
+                reply_keyboard = [['Yes', 'No']]
+                reply_markup = ReplyKeyboardMarkup(reply_keyboard)
+                update.message.reply_text('So are you sure?', reply_markup=reply_markup)
 
-    meeting = get_meeting(update.message.text)
-    if meeting is not None:
-        if check_user_in_meeting(user.username, meeting.id):
-            logger.info("user %s. deleting meeting %s.",
-                        user.first_name, update.message.text)
-            update.message.reply_text(
-                'Hey, do you really want to delete this one? Just to remind...')
-            meeting_info = f'meeting_id: {meeting.id},\nmeeting_name: {meeting.name},\n' + \
-                           f'users: {make_list_of_users(meeting.users)},\nlocation: {meeting.location.name},\n' + \
-                           f'workspace: {meeting.location.workspace.name}' + \
-                           f'started: {meeting.start_time},\nended: {meeting.end_time}'
-            update.message.reply_text(meeting_info)
-            reply_keyboard = [['Yes', 'No']]
-            reply_markup = ReplyKeyboardMarkup(reply_keyboard)
-            update.message.reply_text('So are you sure?', reply_markup=reply_markup)
+                return DELETING_CONFIRMATION
+            else:
+                logger.info("user %s. deleting non-accessable meeting %s",
+                            user.first_name, update.message.text)
+                update.message.reply_text(
+                    'Sorry, you are not patricipate in this meeting. You have no rights to delete it.')
 
-            return DELETING_CONFIRMATION
+                reply_keyboard = [['My meetings', 'Add meeting'],
+                                  ['Add workspace', 'Add location'],
+                                  ['Cancel meeting']]
+                reply_markup = ReplyKeyboardMarkup(reply_keyboard)
+                update.message.reply_text('Please choose:', reply_markup=reply_markup)
+                return ACTION
         else:
-            logger.info("user %s. deleting non-accessable meeting %s",
+            logger.info("user %s. deleting non-existing meeting %s",
                         user.first_name, update.message.text)
-            update.message.reply_text(
-                'Sorry, you are not patricipate in this meeting. You have no rights to delete it.')
-
-            reply_keyboard = [['My meetings', 'Add meeting'],
-                              ['Add workspace', 'Add location'],
-                              ['Cancel meeting']]
-            reply_markup = ReplyKeyboardMarkup(reply_keyboard)
-            update.message.reply_text('Please choose:', reply_markup=reply_markup)
-            return ACTION
-    else:
-        logger.info("user %s. deleting non-existing meeting %s",
-                    user.first_name, update.message.text)
-        update.message.reply_text('It seems like I can\'t find this meeting.\n' +
-                                  'Try again with another one.')
-        cancel_meeting(bot, update, retry=True)
+            update.message.reply_text('It seems like I can\'t find this meeting.\n' +
+                                      'Try again with another one.')
+            cancel_meeting(bot, update, retry=True)
 
 
 def deleting_confirmed(bot, update):
