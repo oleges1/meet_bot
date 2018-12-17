@@ -109,3 +109,22 @@ def user_busy(user, dt=datetime.now()):
 def get_users_timeslots(username):
     user = get_user_by_username(username)
     return user_busy(user) if user is not None else None
+
+@db_session
+def get_meeting(id):
+    return Meeting.get(id=id)
+
+@db_session
+def check_user_in_meeting(username, id):
+    user = get_user_by_username(username)
+    meeting = get_meeting(id)
+    return user in meeting.users
+
+@db_session
+def delete_meeting(id):
+    users = Meeting[id].users
+    for user in users:
+        meetings = user.meetings
+        meetings.remove(id)
+        user.set(meetings=meetings)
+    Meeting[id].delete()

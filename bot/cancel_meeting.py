@@ -35,13 +35,15 @@ def confirm_meeting_deleting(bot, update):
     user = update.message.from_user
     add_user_message(update)
 
-    exist = True # check if meeting with given id exist
-    if exist:
-        accessable = True # check if user has access to this meeting
-        if accessable:
+    meeting = get_meeting(update.message.text)
+    if meeting is not None:
+        if check_user_in_meeting(user.username, meeting.id):
             logger.info("user %s. deleting meeting %s.", user.first_name, update.message.text)
             update.message.reply_text('Hey, do you really want to delete this one? Just to remind...')
-            # print meeting info
+            meeting_info = 'meeting_id: {meeting.id},\nmeeting_name: {meeting.name},\n' + \
+                           'users: {meeting.users},\nlocation: {meeting.location},\n' + \
+                           'started: {meeting.start_time},\nended: {meeting.end_time}'
+            update.message.reply_text(meeting_info)
             reply_keyboard = [['Yes', 'No']]
             reply_markup = ReplyKeyboardMarkup(reply_keyboard)
             update.message.reply_text('So are you sure?', reply_markup=reply_markup)
@@ -58,16 +60,16 @@ def confirm_meeting_deleting(bot, update):
             return ACTION
     else:
         logger.info("user %s. deleting non-existing meeting %s", user.first_name, update.message.text)
-        update.message.reply_text('It seems like I can\'t find this meeting. \
-            Try again with another one.')
+        update.message.reply_text('It seems like I can\'t find this meeting.\n' + \
+            'Try again with another one.')
         cancel_meeting(bot, update, retry=True)
 
 
 def deleting_confirmed(bot, update):
     user = update.message.from_user
+    meeting_id = last_message(user.id).text
     add_user_message(update)
-    # deleting meetings
-    meeting_id = 0
+    delete_meeting(meeting_id)
     logger.info('user %s. deleting meeting %s', user.first_name, meeting_id)
     update.message.reply_text('Great. Meeting %s successfully deleted. See you soon!', meeting_id)
 
