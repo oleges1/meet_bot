@@ -39,10 +39,10 @@ def add_name_to_meeting(bot, update):
 
 def add_user_to_meeting(bot, update):
     from_user = update.message.from_user
-    last_mess = last_message(from_user)
+    last_mess = last_message(from_user.id)
     users = update.message.text.strip().split()
     if last_mess.text.startswith('users'):
-        update_user_message_text(update, last_mess + update.message.text)
+        update_user_message_text(update, last_mess.text + update.message.text)
     else:
         add_user_message_text(update, 'users ' + update.message.text)
     for username in users:
@@ -56,9 +56,9 @@ def add_user_to_meeting(bot, update):
 
 def add_workspace_to_meeting(bot, update):
     from_user = update.message.from_user
-    logger.info("updated users list for %s", user.first_name)
-    last_mess = last_message(from_user)
-    update_user_message_text(update, last_mess[6:])
+    logger.info("updated users list for %s", from_user.first_name)
+    last_mess = last_message(from_user.id)
+    update_user_message_text(update, last_mess.text[6:])
     update.message.reply_text('Great! Now I need to know workspace!')
     return MEETING_WORKSPACE
 
@@ -108,7 +108,7 @@ def end_adding_meeting(bot, update):
         from_user, count=6)
     start_time = dateutil.parser.parse(start_time)
     end_time = dateutil.parser.parse(end_time)
-    meeting, user_ids = add_meeting(
+    meeting, user_ids = add_meeting_to_base(
         name, users, workspace, location, start_time, end_time)
     if meeting is not None:
         for user_id in user_ids:

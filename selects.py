@@ -134,7 +134,7 @@ def add_workspace_to_user(user, workspace):
 def user_busy(user, dt=datetime.now()):
     if not isinstance(user, User):
         raise ValueError('User should be instance of class User')
-    return select(meet.start_time, meet.end_time for meet in Meeting
+    return select((meet.start_time, meet.end_time) for meet in Meeting
                   if meet.user == user and meet.start_time.day() == dt.day())
 
 
@@ -142,7 +142,7 @@ def user_busy(user, dt=datetime.now()):
 def location_busy(user, dt=datetime.now()):
     if not isinstance(location, Location):
         raise ValueError('Location should be instance of class Location')
-    return select(meet.start_time, meet.end_time for meet in Meeting
+    return select((meet.start_time, meet.end_time) for meet in Meeting
                   if meet.location == location and meet.start_time.day() == dt.day())
 
 
@@ -182,7 +182,7 @@ def delete_meeting(id):
 def check_location_busy(loc, start_time, end_time):
     return exists(m for m in Meeting if m.location == loc and (
         (m.start_time < start_time and start_time < m.end_time) or
-        (m.start_time < end_time and end_time < m.end_time) or
+        (m.start_time < end_time and end_time < m.end_time)
     ))
 
 
@@ -190,12 +190,12 @@ def check_location_busy(loc, start_time, end_time):
 def check_user_busy(user, start_time, end_time):
     return exists(m for m in Meeting if user in m.users and (
         (m.start_time < start_time and start_time < m.end_time) or
-        (m.start_time < end_time and end_time < m.end_time) or
+        (m.start_time < end_time and end_time < m.end_time)
     ))
 
 
 @db_session
-def add_meeting(name, users, workspace, location, start_time, end_time):
+def add_meeting_to_base(name, users, workspace, location, start_time, end_time):
     loc = get_location(name, workspace)
     if check_location_busy(loc, start_time, end_time):
         return None, None
