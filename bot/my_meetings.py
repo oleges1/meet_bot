@@ -203,7 +203,8 @@ def get_filtered(bot, update):
             dt_start = dt_parser.parse('1999-01-01 00:00')
         if dt_end is None:
             dt_end = dt_parser.parse('2030-01-01 00:00')
-        filtered = None
+        filtered = meet_ids_in_time(dt_start, dt_end)
+        print(filtered)
         if workspace is not None:
             if location is None:
                 if not isinstance(workspace, Workspace):
@@ -231,7 +232,7 @@ def get_filtered(bot, update):
                 else:
                     update.message.reply_text(
                         f'I don\'t know such location: {location} in workspace: {workspace}')
-        if users is not None:
+        if participants is not None:
             for username in participants:
                 if not isinstance(user, User):
                     username = username[1:] if username.startswith('@') else username
@@ -245,9 +246,12 @@ def get_filtered(bot, update):
                 else:
                     update.message.reply_text(
                         f'I don\'t know such username: {username}')
-        update.message.reply_text(format_filtered([Meeting[id] for id in filtered]))
+        if filtered is not None and len(filtered) > 0:
+            update.message.reply_text(format_filtered([Meeting[id] for id in filtered]))
+        else:
+            update.message.reply_text('nothing found')
     update.message.reply_text('Your filters cleared.')
-    list_of_meetings(bot, update)
+    return LIST_OF_MEETINGS
 
 
 def make_list_of_users(users):

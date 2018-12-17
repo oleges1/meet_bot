@@ -2,6 +2,7 @@ from pony.orm import *
 from pony_starting import *
 from dateutil import parser as dt_parser
 
+
 @db_session
 def add_user_message(update):
     user = User.get(telegram_id=update.message.from_user.id)
@@ -254,24 +255,30 @@ def check_user_in_meeting(username, id):
 def meet_ids_user_in_time(user, dt_start, dt_end):
     if not isinstance(user, User):
         raise ValueError('User should be instance of class User')
-    return set(list(select(meet.id for meet in Meeting
-                           if user in meet.users and
-                           (m.start_time < dt_start and dt_end > m.end_time))))
+    return set(list(select(m.id for m in Meeting
+                           if user in m.users and
+                           (m.start_time > dt_start and dt_end > m.end_time))))
 
 
 @db_session
 def meet_ids_location_in_time(location, dt_start, dt_end):
     if not isinstance(location, Location):
         raise ValueError('location should be instance of class Location')
-    return set(list(select(meet.id for meet in Meeting
-                           if location == meet.location and
-                           (m.start_time < dt_start and dt_end > m.end_time))))
+    return set(list(select(m.id for m in Meeting
+                           if location == m.location and
+                           (m.start_time > dt_start and dt_end > m.end_time))))
 
 
 @db_session
 def meet_ids_workspace_in_time(workspace, dt_start, dt_end):
     if not isinstance(workspace, Workspace):
         raise ValueError('workspace should be instance of class Workspace')
-    return set(list(select(meet.id for meet in Meeting
-                           if meet.location in workspace.locations and
-                           (m.start_time < dt_start and dt_end > m.end_time))))
+    return set(list(select(m.id for m in Meeting
+                           if m.location in workspace.locations and
+                           (m.start_time > dt_start and dt_end > m.end_time))))
+
+
+@db_session
+def meet_ids_in_time(dt_start, dt_end):
+    return set(list(select(m.id for m in Meeting
+                           if m.start_time > dt_start and dt_end > m.end_time)))
