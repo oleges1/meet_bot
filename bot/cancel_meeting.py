@@ -16,6 +16,9 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
+def make_list_of_users(users):
+
+
 def cancel_meeting(bot, update, retry=False):
     user = update.message.from_user
     add_user_message(update)
@@ -42,9 +45,10 @@ def confirm_meeting_deleting(bot, update):
                         user.first_name, update.message.text)
             update.message.reply_text(
                 'Hey, do you really want to delete this one? Just to remind...')
-            meeting_info = 'meeting_id: {meeting.id},\nmeeting_name: {meeting.name},\n' + \
-                           'users: {meeting.users},\nlocation: {meeting.location},\n' + \
-                           'started: {meeting.start_time},\nended: {meeting.end_time}'
+            meeting_info = f'meeting_id: {meeting.id},\nmeeting_name: {meeting.name},\n' + \
+                           f'users: {make_list_of_users(meeting.users)},\nlocation: {meeting.location.name},\n' + \
+                           f'workspace: {meeting.location.workspace.name}' + \
+                           f'started: {meeting.start_time},\nended: {meeting.end_time}'
             update.message.reply_text(meeting_info)
             reply_keyboard = [['Yes', 'No']]
             reply_markup = ReplyKeyboardMarkup(reply_keyboard)
