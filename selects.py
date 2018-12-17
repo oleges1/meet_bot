@@ -253,7 +253,6 @@ def check_user_in_meeting(username, id):
 
 @db_session
 def filter(user, dt_start=None, dt_end=None, location=None, workspace=None, users=None):
-
     if dt_start == None:
         dt_start = dt_parser.parse('1999-01-01 00:00')
     if dt_end == None:

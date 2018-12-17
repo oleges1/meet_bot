@@ -10,6 +10,7 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, CallbackQuery
 
 from selects import *
 from bot.states import *
+from dateutil import parser as dt_parser
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -31,8 +32,9 @@ def list_of_meetings(bot, update):
     workspace = None
 
     reply_keyboard = [['No Filter'],
-                      ['Filter by time', 'Filter by participants'],
-                      ['Filter by location', 'Filter by workspace']]
+                      ['Filter by time from', 'Filter by time to'],
+                      ['Filter by location', 'Filter by workspace'],
+                      ['Filter by participants']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text(
         'Do you need to apply a filter for your meetings?', reply_markup=reply_markup)
@@ -44,7 +46,7 @@ def filter_by_participants_get(bot, update):
     logger.info("required filter by participants from %s", user.first_name)
     update.message.reply_text(
         'Send users who must be in meeting, format: "username1 username2 ..."')
-    return LIST_OF_PARTICIPANTS
+    return LIST_PARTICIPANTS
 
 
 def filter_by_participants_apply(bot, update):
@@ -67,7 +69,8 @@ def filter_by_participants_apply(bot, update):
         else:
             participants.append(user)
 
-    reply_keyboard = [['No, get meetings', 'Filter by time'],
+    reply_keyboard = [['No, get meetings']
+                      ['Filter by time from', 'Filter by time to'],
                       ['Filter by location', 'Filter by workspace']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text(
@@ -75,24 +78,49 @@ def filter_by_participants_apply(bot, update):
     return LIST_OF_MEETINGS
 
 
-def filter_by_time_get(bot, update):
+def filter_by_time_from_get(bot, update):
     user = update.message.from_user
     add_user_message(update)
     logger.info("required filter by time from %s", user.first_name)
     update.message.reply_text(
-        'Send time borders for meeting, format: "YYYY:MM:DD-HH:MM YYYY:MM:DD-HH:MM".\n' + \
-        'If you need only one border, just set second enormous big.')
-    return LIST_OF_TIME
+        'Send time all meetings should be after.')
+    return LIST_TIME_FROM
 
 
-def filter_by_time_apply(bot, update):
+def filter_by_time_from_apply(bot, update):
     user = update.message.from_user
     global time
-    time = update.message.text.lower().strip().split()
+    time[0] = dt_parser.parse(update.message.text.lower().strip())
     add_user_message(update)
-    logger.info("got time filter from %s: %s", user.first_name, update.message.text)
+    logger.info("got time filter from %s: since %s", user.first_name, update.message.text)
 
-    reply_keyboard = [['No, get meetings', 'Filter by participants'],
+    reply_keyboard = [['No, get meetings']
+                      ['Filter by participants', 'Filter by time to'],
+                      ['Filter by location', 'Filter by workspace']]
+    reply_markup = ReplyKeyboardMarkup(reply_keyboard)
+    update.message.reply_text(
+        'Do you need to apply another filter?', reply_markup=reply_markup)
+    return LIST_OF_MEETINGS
+
+
+def filter_by_time_to_get(bot, update):
+    user = update.message.from_user
+    add_user_message(update)
+    logger.info("required filter by time from %s", user.first_name)
+    update.message.reply_text(
+        'Send time all meetings should be before.')
+    return LIST_TIME_TO
+
+
+def filter_by_time_to_apply(bot, update):
+    user = update.message.from_user
+    global time
+    time[1] = dt_parser.parse(update.message.text.lower().strip())
+    add_user_message(update)
+    logger.info("got time filter from %s: until %s", user.first_name, update.message.text)
+
+    reply_keyboard = [['No, get meetings']
+                      ['Filter by participants', 'Filter by time from'],
                       ['Filter by location', 'Filter by workspace']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text(
@@ -106,7 +134,7 @@ def filter_by_location_get(bot, update):
     logger.info("required filter by location from %s", user.first_name)
     update.message.reply_text(
         'Send location at which meeting could held')
-    return LIST_OF_LOCATION
+    return LIST_LOCATION
 
 
 def filter_by_location_apply(bot, update):
@@ -116,8 +144,9 @@ def filter_by_location_apply(bot, update):
     add_user_message(update)
     logger.info("got location filter from %s: %s", user.first_name, update.message.text)
 
-    reply_keyboard = [['No, get meetings', 'Filter by participants'],
-                      ['Filter by time', 'Filter by workspace']]
+    reply_keyboard = [['No, get meetings']
+                      ['Filter by time from', 'Filter by time to'],
+                      ['Filter by workspace', 'Filter by participants']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text(
         'Do you need to apply another filter?', reply_markup=reply_markup)
@@ -130,7 +159,7 @@ def filter_by_workspace_get(bot, update):
     logger.info("required filter by workspace from %s", user.first_name)
     update.message.reply_text(
         'Send workspace at which meeting could held')
-    return LIST_OF_WORKSPACE
+    return LIST_WORKSPACE
 
 def filter_by_workspace_apply(bot, update):
     user = update.message.from_user
@@ -139,8 +168,9 @@ def filter_by_workspace_apply(bot, update):
     add_user_message(update)
     logger.info("got workspace filter from %s: %s", user.first_name, update.message.text)
 
-    reply_keyboard = [['No, get meetings', 'Filter by participants'],
-                      ['Filter by location', 'Filter by time']]
+    reply_keyboard = [['No, get meetings']
+                      ['Filter by time from', 'Filter by time to'],
+                      ['Filter by location', 'Filter by participants']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text(
         'Do you need to apply another filter?', reply_markup=reply_markup)
@@ -166,20 +196,23 @@ def format_filtered(meetings):
         meeting_info = f'meeting_id: {meeting.id},\n meeting_name: {meeting.name},\n' + \
                        f'users: {make_list_of_users(meeting.users)},\n location: {meeting.location.name},\n ' + \
                        f'workspace: {meeting.location.workspace.name}\n ' + \
-                       f'started: {meeting.start_time},\n ended: {meeting.end_time}\n'
+                       f'started: {meeting.start_time},\n ended: {meeting.end_time}\n\n'
         text += meeting_info
     return text
+
 
 list_of_meetings_states = {
     LIST_OF_MEETINGS : [
         RegexHandler('^(Filter by participants)$', filter_by_participants_get),
-        RegexHandler('^(Filter by time)$', filter_by_time_get),
+        RegexHandler('^(Filter by time from)$', filter_by_time_from_get),
+        RegexHandler('^(Filter by time to)$', filter_by_time_to_get),
         RegexHandler('^(Filter by location)$', filter_by_location_get),
         RegexHandler('^(Filter by workspace)$', filter_by_workspace_get),
         RegexHandler('^((No Filter)|(No, get meetings))$', get_filtered),
     ],
-    LIST_OF_PARTICIPANTS : [MessageHandler(Filters.text, filter_by_participants_apply)],
-    LIST_OF_TIME : [MessageHandler(Filters.text, filter_by_time_apply)],
-    LIST_OF_LOCATION : [MessageHandler(Filters.text, filter_by_location_apply)],
-    LIST_OF_WORKSPACE : [MessageHandler(Filters.text, filter_by_workspace_apply)],
+    LIST_PARTICIPANTS : [MessageHandler(Filters.text, filter_by_participants_apply)],
+    LIST_TIME_FROM : [MessageHandler(Filters.text, filter_by_time_from_apply)],
+    LIST_TIME_TO : [MessageHandler(Filters.text, filter_by_time_to_apply)],
+    LIST_LOCATION : [MessageHandler(Filters.text, filter_by_location_apply)],
+    LIST_WORKSPACE : [MessageHandler(Filters.text, filter_by_workspace_apply)],
 }
