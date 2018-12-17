@@ -203,6 +203,7 @@ def get_filtered(bot, update):
         if dt_end is None:
             dt_end = dt_parser.parse('2030-01-01 00:00')
         filtered = meet_ids_in_time(dt_start, dt_end)
+        print(filtered)
         if workspace is not None:
             if location is None:
                 if not isinstance(workspace, Workspace):
