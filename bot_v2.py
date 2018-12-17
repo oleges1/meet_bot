@@ -11,6 +11,7 @@ from bot.my_meetings import *
 from bot.add_meeting import *
 from bot.add_workspace import *
 from bot.add_location import *
+from bot.cancel_meeting import *
 from bot.states import *
 
 import os
@@ -27,7 +28,8 @@ logger = logging.getLogger(__name__)
 
 def start(bot, update):
     reply_keyboard = [['My meetings', 'Add meeting'],
-                      ['Add workspace', 'Add location']]
+                      ['Add workspace', 'Add location'],
+                      ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     add_user_message(update)
     update.message.reply_text('Please choose:', reply_markup=reply_markup)
@@ -69,8 +71,9 @@ def main():
                      RegexHandler('^(Add meeting)$', add_meeting),
                      RegexHandler('^(Add workspace)$', add_workspace),
                      RegexHandler('^(Add location)$', add_location),
+                     RegexHandler('^(Cancel meeting)$', cancel_meeting),
                      RegexHandler(
-                         '^((?!(My meetings)|(Add meeting)|(Add workspace)|(Add location)).)*$', start)
+                         '^((?!(My meetings)|(Add meeting)|(Add workspace)|(Add location)|(Cancel meeting)).)*$', start)
                      ]
         },
 
