@@ -1,6 +1,6 @@
 from pony.orm import *
 from pony_starting import *
-from dateutil import parser as dt_parser
+
 
 @db_session
 def add_user_message(update):
@@ -254,28 +254,65 @@ def check_user_in_meeting(username, id):
 @db_session
 def filter(user, dt_start=None, dt_end=None, location=None, workspace=None, users=None):
     if dt_start == None:
+def meet_ids_user_in_time(user, dt_start, dt_end):
+    if not isinstance(user, User):
+        raise ValueError('User should be instance of class User')
+    return set(list(select(meet.id for meet in Meeting
+                           if user in meet.users and
+                           (m.start_time < dt_start and dt_end > m.end_time))))
+
+
+@db_session
+def meet_ids_location_in_time(location, dt_start, dt_end):
+    if not isinstance(location, Location):
+        raise ValueError('location should be instance of class Location')
+    return set(list(select(meet.id for meet in Meeting
+                           if location == meet.location and
+                           (m.start_time < dt_start and dt_end > m.end_time))))
+
+
+@db_session
+def meet_ids_workspace_in_time(workspace, dt_start, dt_end):
+    if not isinstance(workspace, Workspace):
+        raise ValueError('workspace should be instance of class Workspace')
+    return set(list(select(meet.id for meet in Meeting
+                           if meet.location in workspace.locations and
+                           (m.start_time < dt_start and dt_end > m.end_time))))
+
+
+@db_session
+def filter(user, dt_start=None, dt_end=None, location=None, workspace=None, users=None):
+    if dt_start is None:
         dt_start = dt_parser.parse('1999-01-01 00:00')
-    if dt_end == None:
+    if dt_end is None:
         dt_end = dt_parser.parse('2030-01-01 00:00')
-    # user = get_user_by_username(user)
-    # if location == None and workspace == None:
-    user = get_user_by_username(user.username)
-    filtered = select(m for m in Meeting
-                      if user in m.users and
-                      (m.start_time > dt_start and dt_end > m.end_time))
-        # if users != None:
-        #     for user in users:
-        #         filtered = select(m for m in filtered
-        #                           if user.id in m.users)
-    # elif location == None:
-    #     filtered = list(select((m for m in Meeting
-    #         if user_id in m.users for user_id in users and
-    #         (m.start_time > dt_start and dt_end > m.end_time) and
-    #         m.workspace == workspace)))
-    # else:
-    #     filtered = list(select((m for m in Meeting
-    #         if user_id in m.users for user_id in users and
-    #         (m.start_time > dt_start and dt_end > m.end_time) and
-    #         m.workspace == workspace and
-    #         m.location == location)))
-    return list(filtered)
+    filtered = None
+    if workspace is not None:
+        if location is None:
+            if not isinstance(workspace, Workspace):
+                workspace = get_workspace(workspace)
+            if filtered is None:
+                filtered = meet_ids_workspace_in_time(workspace, dt_start, dt_end)
+            else:
+                filtered = filtered.intersection(
+                    meet_ids_workspace_in_time(workspace, dt_start, dt_end))
+        else:
+            if not isinstance(location, Location):
+                location = get_location(location, workspace)
+            if filtered is None:
+                filtered = meet_ids_workspace_in_time(location, dt_start, dt_end)
+            else:
+                filtered = filtered.intersection(
+                    meet_ids_location_in_time(location, dt_start, dt_end))
+    if users is not None:
+        for username in users:
+            if not isinstance(user, User):
+                username = username[1:] if username.startswith('@') else username
+                user = get_user_by_username(username)
+            if filtered is None:
+                filtered = meet_ids_user_in_time(user, dt_start, dt_end)
+            else:
+                filtered = filtered.intersection(
+                    meet_ids_user_in_time(user, dt_start, dt_end))
+    res = [Meeting[id] for id in filtered]
+    return res
