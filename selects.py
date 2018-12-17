@@ -252,6 +252,7 @@ def check_user_in_meeting(username, id):
     return user in meeting.users
 
 
+@db_session
 def meet_ids_user_in_time(user, dt_start, dt_end):
     if not isinstance(user, User):
         raise ValueError('User should be instance of class User')
