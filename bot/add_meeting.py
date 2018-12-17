@@ -18,6 +18,15 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
+def convert_timeslots(timeslots):
+    res = ''
+    for timeslot_pair in timeslots:
+        start, end = timeslot_pair
+        res += 'start: ' + start.strftime("%Y-%m-%d %H:%M") + \
+            'end: ' + end.strftime("%Y-%m-%d %H:%M") + '\n'
+    return res
+
+
 def add_meeting(bot, update):
     user = update.message.from_user
     add_user_message(update)
@@ -53,7 +62,7 @@ def add_user_to_meeting(bot, update):
         if timeslots is not None:
             if len(timeslots) > 0:
                 update.message.reply_text(
-                    f'Today user {username} is busy in:' + timeslots)
+                    f'Today user {username} is busy in:\n' + convert_timeslots(timeslots))
             else:
                 update.message.reply_text(
                     f'Today user {username} is free')
@@ -93,7 +102,7 @@ def add_start_to_meeting(bot, update):
     if timeslots is not None:
         if len(timeslots) > 0:
             update.message.reply_text(
-                f'Today location {update.message.text} is busy in:' + timeslots)
+                f'Today location {update.message.text} is busy in:\n' + convert_timeslots(timeslots))
         else:
             update.message.reply_text(
                 f'Today location {update.message.text} is free')
