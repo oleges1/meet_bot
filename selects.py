@@ -245,6 +245,8 @@ def get_meeting(id):
 @db_session
 def check_user_in_meeting(username, id):
     user = get_user_by_username(username)
+    if user is None:
+        return False
     meeting = get_meeting(id)
     return user in meeting.users
 
@@ -257,13 +259,13 @@ def filter(user, dt_start=None, dt_end=None, location=None, workspace=None, user
         dt_start = datetime.strptime('2030-01-01 00:00', '%Y-%m-%d %H:%M')
     # user = get_user_by_username(user)
     if location == None and workspace == None:
-        filtered = select((m for m in Meeting
-            if user in m.users and
-            (m.start_time > dt_start and dt_end > m.end_time)))
+        filtered = select(m for m in Meeting
+                          if user in m.users and
+                          (m.start_time > dt_start and dt_end > m.end_time))
         if users != None:
             for user in users:
-                filtered = select((m for m in filtered
-                    if user.id in m.users))
+                filtered = select(m for m in filtered
+                                  if user.id in m.users)
     # elif location == None:
     #     filtered = list(select((m for m in Meeting
     #         if user_id in m.users for user_id in users and
