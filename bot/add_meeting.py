@@ -110,11 +110,14 @@ def end_adding_meeting(bot, update):
     end_time = dateutil.parser.parse(end_time)
     meeting, user_ids = add_meeting(
         name, users, workspace, location, start_time, end_time)
-    for user_id in user_ids:
-        bot.send_message(
-            chat_id=user_id, text="You are invited into new meeting with id %s, check it using \"My meetings\" button" % meeting.id)
-    update.message.reply_text(
-        'Great! New meeting with id %s is added to your schedule.' % meeting.id)
+    if meeting is not None:
+        for user_id in user_ids:
+            bot.send_message(
+                chat_id=user_id, text="You are invited into new meeting with id %s, check it using \"My meetings\" button" % meeting.id)
+        update.message.reply_text(
+            'Great! New meeting with id %s is added to your schedule.' % meeting.id)
+    else:
+        update.message.reply_text('New meeting creation failed due to someone is busy')
     reply_keyboard = [['My meetings', 'Add meeting'],
                       ['Add workspace', 'Add location']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
