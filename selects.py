@@ -62,16 +62,6 @@ def get_or_create_user(telegram_id):
     return temp_workspace if temp_workspace is not None else User(telegram_id=telegram_id)
 
 
-# @db_session
-# def create_message(user, text):
-#     if not isinstance(user, User):
-#         user = get_user(user)
-#     return Message(
-#         user=user,
-#         text=update.message.text.lower().strip()
-#     )
-
-
 @db_session
 def get_workspace(name):
     return Workspace.get(name=name)
@@ -93,11 +83,35 @@ def get_location(name, workspace):
 
 
 @db_session
+def get_location(name, workspace):
+    if not isinstance(workspace, Workspace):
+        workspace = get_workspace(workspace)
+    if workspace is None:
+        return None
+    return Location.get(name=name, workspace=workspace)
+
+
+@db_session
 def create_location(name, workspace):
     return Location(
         workspace=workspace,
         name=name
     )
+
+
+@db_session
+def most_popular_locations(workspace, num=5):
+    if not isinstance(workspace, Workspace):
+        workspace = get_workspace(workspace)
+    if workspace is None:
+        return []
+    return list(Location.select(lambda loc: loc.workspace ==
+                                workspace).order_by(lambda loc: desc(len(loc.meetings)))[:num])
+
+
+@db_session
+def most_popular_workspaces(num=5):
+    return list(Workspace.select().order_by(lambda w: desc(len(w.users)))[:num])
 
 
 @db_session

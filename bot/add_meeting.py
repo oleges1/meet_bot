@@ -83,14 +83,23 @@ def add_workspace_to_meeting(bot, update):
     users.append(from_user.username)
     update_user_message_text(update, ' '.join(list(set(users))))
     update.message.reply_text('Great! Now I need to know workspace!')
+    items = ''
+    for i, wspace in enumerate(most_popular_workspaces()):
+        items += f'{i}. {wspace.name} \n '
+    update.message.reply_text(f'Most popular now are: \n {items}')
     return MEETING_WORKSPACE
 
 
 def add_location_to_meeting(bot, update):
     user = update.message.from_user
     logger.info("updated workspace for %s: %s", user.first_name, update.message.text)
+    wspace = last_message(from_user.id).text
     add_user_message(update)
     update.message.reply_text('Great! Now I need to know location!')
+    items = ''
+    for i, loc in enumerate(most_popular_locations(wspace)):
+        items += f'{i}. {loc.name} \n '
+    update.message.reply_text(f'Most popular now are: \n {items}')
     return MEETING_LOCATION
 
 
