@@ -1,10 +1,6 @@
 from pony.orm import *
 from pony_starting import *
 from dateutil import parser as dt_parser
-<< << << < HEAD
-== == == =
-
->>>>>> > a12c95b47557a1f25b5ece740ed755b874be4f88
 
 
 @db_session
@@ -278,7 +274,7 @@ def meet_ids_workspace_in_time(workspace, dt_start, dt_end):
     if not isinstance(workspace, Workspace):
         raise ValueError('workspace should be instance of class Workspace')
     return set(list(select(m.id for m in Meeting
-                           if meet.location in workspace.locations and
+                           if m.location in workspace.locations and
                            (m.start_time < dt_start and dt_end > m.end_time))))
 
 
