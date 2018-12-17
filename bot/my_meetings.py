@@ -64,6 +64,7 @@ def filter_by_participants_apply(bot, update):
 
     all_users_exist = True
     for username in usernames:
+        username = username[1:] if username.startswith('@') else username
         user = get_user_by_username(username)
         if user == None:
             logger.info("user %s does not exist", username)
@@ -205,7 +206,6 @@ def get_filtered(bot, update):
         if dt_end is None:
             dt_end = dt_parser.parse('2030-01-01 00:00')
         filtered = meet_ids_in_time(dt_start, dt_end)
-        print(filtered)
         if workspace is not None:
             if location is None:
                 if not isinstance(workspace, Workspace):
@@ -236,6 +236,7 @@ def get_filtered(bot, update):
         if participants is not None:
             for username in participants:
                 if not isinstance(user, User):
+                    username = username.username
                     username = username[1:] if username.startswith('@') else username
                     user = get_user_by_username(username)
                 if user is not None:
