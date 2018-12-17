@@ -35,8 +35,7 @@ def list_of_meetings(bot, update):
     reply_keyboard = [['No Filter'],
                       ['Filter by time from', 'Filter by time to'],
                       ['Filter by location', 'Filter by workspace'],
-                      ['Filter by participants'],
-                      ['Back to main menu']]
+                      ['Filter by participants']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text(
         'Do you need to apply a filter for your meetings?', reply_markup=reply_markup)
@@ -198,7 +197,6 @@ def filter_by_workspace_apply(bot, update):
 def get_filtered(bot, update):
     user = update.message.from_user
     global participants, time, location, workspace
-    users = participants
     with db_session:
         dt_start, dt_end = time[0], time[1]
         if dt_start is None:
@@ -220,6 +218,7 @@ def get_filtered(bot, update):
                 else:
                     update.message.reply_text(
                         f'I don\'t know such workspace: {workspace}')
+                    return ACTION
             else:
                 if not isinstance(location, Location):
                     location_item = get_location(location, workspace)
@@ -233,6 +232,7 @@ def get_filtered(bot, update):
                 else:
                     update.message.reply_text(
                         f'I don\'t know such location: {location} in workspace: {workspace}')
+                    return ACTION
         if participants is not None:
             for username in participants:
                 if not isinstance(user, User):
@@ -248,20 +248,15 @@ def get_filtered(bot, update):
                 else:
                     update.message.reply_text(
                         f'I don\'t know such username: {username}')
+                    return ACTION
         if filtered is not None and len(filtered) > 0:
             update.message.reply_text(format_filtered([Meeting[id] for id in filtered]))
         else:
             update.message.reply_text('nothing found')
-    update.message.reply_text('Your filters cleared.')
-    return list_of_meetings(bot, update)
-
-
-def back_to_main_menu(bot, update):
     reply_keyboard = [['My meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
                       ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
-    add_user_message(update)
     update.message.reply_text('Please choose:', reply_markup=reply_markup)
     return ACTION
 
@@ -291,7 +286,6 @@ list_of_meetings_states = {
         RegexHandler('^(Filter by time to)$', filter_by_time_to_get),
         RegexHandler('^(Filter by location)$', filter_by_location_get),
         RegexHandler('^(Filter by workspace)$', filter_by_workspace_get),
-        RegexHandler('^(Back to main menu)$', back_to_main_menu),
         RegexHandler('^((No Filter)|(No, get meetings))$', get_filtered),
         MessageHandler(Filters.text, list_of_meetings)
     ],
