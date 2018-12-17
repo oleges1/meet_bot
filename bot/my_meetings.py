@@ -249,7 +249,7 @@ def get_filtered(bot, update):
         else:
             update.message.reply_text('nothing found')
     update.message.reply_text('Your filters cleared.')
-    return LIST_OF_MEETINGS
+    list_of_meetings(bot, update)
 
 
 def make_list_of_users(users):
