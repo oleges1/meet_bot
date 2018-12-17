@@ -152,6 +152,9 @@ def get_users_timeslots(username):
     return user_busy(user) if user is not None else None
 
 
+<< << << < HEAD
+
+
 @db_session
 def get_location_timeslots(name, workspace):
     loc = get_location(name, workspace)
@@ -183,3 +186,25 @@ def add_meeting(name, users, workspace, location, start_time, end_time):
         user.meetings.add(meet)
         meet.users.add(user)
     return meet, user_ids
+
+
+@db_session
+def get_meeting(id):
+    return Meeting.get(id=id)
+
+
+@db_session
+def check_user_in_meeting(username, id):
+    user = get_user_by_username(username)
+    meeting = get_meeting(id)
+    return user in meeting.users
+
+
+@db_session
+def delete_meeting(id):
+    users = Meeting[id].users
+    for user in users:
+        meetings = user.meetings
+        meetings.remove(id)
+        user.set(meetings=meetings)
+    Meeting[id].delete()
