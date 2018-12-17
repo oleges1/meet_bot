@@ -246,6 +246,7 @@ def get_filtered(bot, update):
                         f'I don\'t know such username: {username}')
         update.message.reply_text(format_filtered([Meeting[id] for id in filtered]))
     update.message.reply_text('Your filters cleared.')
+    return LIST_OF_MEETINGS
 
 
 def make_list_of_users(users):
