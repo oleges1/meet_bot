@@ -32,16 +32,19 @@ def add_location_name(bot, update):
     workspace_name = update.message.text
     workspace = get_workspace(workspace_name)
     if workspace is not None:
-        logger.info("user %s. adding location for workspace %s", user.first_name, update.message.text)
+        logger.info("user %s. adding location for workspace %s",
+                    user.first_name, update.message.text)
         update.message.reply_text('Great! Now tell me the name of your location!')
         return LOCATION_NAME
     else:
-        logger.info("user %s. adding location for non-existing workspace %s", user.first_name, update.message.text)
+        logger.info("user %s. adding location for non-existing workspace %s",
+                    user.first_name, update.message.text)
         update.message.reply_text('Sorry, mate. I don\'t know this workspace.\
             Please, create one in the main menu and try again.')
 
         reply_keyboard = [['My meetings', 'Add meeting'],
-                          ['Add workspace', 'Add location']]
+                          ['Add workspace', 'Add location'],
+                          ['Cancel meeting']]
         reply_markup = ReplyKeyboardMarkup(reply_keyboard)
         update.message.reply_text('Please choose:', reply_markup=reply_markup)
         return ACTION
@@ -57,10 +60,12 @@ def added_location(bot, update):
     add_location_to_workspace(update.message.text.lower().strip(), workspace.id)
 
     logger.info("user %s. location %s added.", user.first_name, update.message.text)
-    update.message.reply_text('Great! Now you can hold meetings at {update.message.text} in workspace {workspace_name}')
+    update.message.reply_text(
+        'Great! Now you can hold meetings at {update.message.text} in workspace {workspace_name}')
 
     reply_keyboard = [['My meetings', 'Add meeting'],
-                      ['Add workspace', 'Add location']]
+                      ['Add workspace', 'Add location'],
+                      ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text('Please choose:', reply_markup=reply_markup)
     return ACTION

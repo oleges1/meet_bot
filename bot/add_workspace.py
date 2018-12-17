@@ -28,19 +28,22 @@ def add_workspace(bot, update):
 def added_workspace(bot, update):
     user = update.message.from_user
     add_user_message(update)
-
     workspace_name = last_message(user.id).text
     workspace = get_workspace(workspace_name)
     if workspace is not None:
-        accessable = True # check if user has access to workspace
+        accessable = True  # check if user has access to workspace
         if accessable:
-            logger.info("user %s. workspace %s already accessable.", user.first_name, update.message.text)
-            update.message.reply_text('Hey, you already can hold meetings in %s. Try again with another workspace! :)' % update.message.text)
+            logger.info("user %s. workspace %s already accessable.",
+                        user.first_name, update.message.text)
+            update.message.reply_text(
+                'Hey, you already can hold meetings in %s. Try again with another workspace! :)' % update.message.text)
         else:
             add_user_to_workspace(user.id, update.message.text.lower().strip())
             add_workspace_to_user(user.id, update.message.text.lower().strip())
-            logger.info("user %s. workspace %s added", user.first_name, update.message.text)
-            update.message.reply_text('Great! Now you can hold meetings in %s.' % update.message.text)
+            logger.info("user %s. workspace %s added",
+                        user.first_name, update.message.text)
+            update.message.reply_text(
+                'Great! Now you can hold meetings in %s.' % update.message.text)
     else:
         logger.info("user %s. unknown workspace %s", user.first_name, update.message.text)
         workspace = get_or_create_workspace(workspace_name)
@@ -50,7 +53,8 @@ def added_workspace(bot, update):
             But don\'t worry, now I know! Now you can hold meetings in %s.' % update.message.text)
 
     reply_keyboard = [['My meetings', 'Add meeting'],
-                      ['Add workspace', 'Add location']]
+                      ['Add workspace', 'Add location'],
+                      ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text('Please choose:', reply_markup=reply_markup)
     return ACTION

@@ -58,7 +58,8 @@ def confirm_meeting_deleting(bot, update):
                 'Sorry, you are not patricipate in this meeting. You have no rights to delete it.')
 
             reply_keyboard = [['My meetings', 'Add meeting'],
-                              ['Add workspace', 'Add location']]
+                              ['Add workspace', 'Add location'],
+                              ['Cancel meeting']]
             reply_markup = ReplyKeyboardMarkup(reply_keyboard)
             update.message.reply_text('Please choose:', reply_markup=reply_markup)
             return ACTION
@@ -80,7 +81,8 @@ def deleting_confirmed(bot, update):
         'Great. Meeting %s successfully deleted. See you soon!', meeting_id)
 
     reply_keyboard = [['My meetings', 'Add meeting'],
-                      ['Add workspace', 'Add location']]
+                      ['Add workspace', 'Add location'],
+                      ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text('Please choose:', reply_markup=reply_markup)
     return ACTION
@@ -95,7 +97,8 @@ def deleting_unconfirmed(bot, update):
         'Great. Meeting %s remains stable. See you soon!', meeting_id)
 
     reply_keyboard = [['My meetings', 'Add meeting'],
-                      ['Add workspace', 'Add location']]
+                      ['Add workspace', 'Add location'],
+                      ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text('Please choose:', reply_markup=reply_markup)
     return ACTION
