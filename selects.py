@@ -1,6 +1,6 @@
 from pony.orm import *
 from pony_starting import *
-
+from dateutil import parser as dt_parser
 
 @db_session
 def add_user_message(update):
@@ -253,19 +253,21 @@ def check_user_in_meeting(username, id):
 
 @db_session
 def filter(user, dt_start=None, dt_end=None, location=None, workspace=None, users=None):
+
     if dt_start == None:
-        dt_start = datetime.strptime('1999-01-01 00:00', '%Y-%m-%d %H:%M')
+        dt_start = dt_parser.parse('1999-01-01 00:00')
     if dt_end == None:
-        dt_start = datetime.strptime('2030-01-01 00:00', '%Y-%m-%d %H:%M')
+        dt_end = dt_parser.parse('2030-01-01 00:00')
     # user = get_user_by_username(user)
-    if location == None and workspace == None:
-        filtered = select(m for m in Meeting
-                          if user in m.users and
-                          (m.start_time > dt_start and dt_end > m.end_time))
-        if users != None:
-            for user in users:
-                filtered = select(m for m in filtered
-                                  if user.id in m.users)
+    # if location == None and workspace == None:
+    user = get_user_by_username(user.username)
+    filtered = select(m for m in Meeting
+                      if user in m.users and
+                      (m.start_time > dt_start and dt_end > m.end_time))
+        # if users != None:
+        #     for user in users:
+        #         filtered = select(m for m in filtered
+        #                           if user.id in m.users)
     # elif location == None:
     #     filtered = list(select((m for m in Meeting
     #         if user_id in m.users for user_id in users and
@@ -277,4 +279,4 @@ def filter(user, dt_start=None, dt_end=None, location=None, workspace=None, user
     #         (m.start_time > dt_start and dt_end > m.end_time) and
     #         m.workspace == workspace and
     #         m.location == location)))
-    return filtered
+    return list(filtered)

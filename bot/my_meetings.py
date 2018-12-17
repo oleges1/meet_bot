@@ -149,8 +149,26 @@ def filter_by_workspace_apply(bot, update):
 def get_filtered(bot, update):
     user = update.message.from_user
     global participants, time, location, workspace
-    print(filter(user, time[0], time[1], location, workspace, participants))
+    with db_session:
+        update.message.reply_text(format_filtered(filter(user, time[0], time[1], location, workspace, participants)))
 
+
+def make_list_of_users(users):
+    res = ''
+    for user in users:
+        res += f'@{user.username} '
+    return res
+
+
+def format_filtered(meetings):
+    text = ''
+    for meeting in meetings:
+        meeting_info = f'meeting_id: {meeting.id},\n meeting_name: {meeting.name},\n' + \
+                       f'users: {make_list_of_users(meeting.users)},\n location: {meeting.location.name},\n ' + \
+                       f'workspace: {meeting.location.workspace.name}\n ' + \
+                       f'started: {meeting.start_time},\n ended: {meeting.end_time}\n'
+        text += meeting_info
+    return text
 
 list_of_meetings_states = {
     LIST_OF_MEETINGS : [
