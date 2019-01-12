@@ -18,6 +18,24 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 
+def serialize_to_mess(update, temp_metadata):
+    temp_metadata['start_time'] = temp_metadata['start_time'].strftime(
+        "%Y-%m-%d %H:%M:%S")
+    temp_metadata['end_time'] = temp_metadata['end_time'].strftime(
+        "%Y-%m-%d %H:%M:%S")
+    update_user_message_text(update, json.dumps(temp_metadata))
+
+
+def unserialize_from_last(user):
+    last_mess = last_message(user.id).text
+    temp_metadata = json.load(last_mess)
+    temp_metadata['start_time'] = datetime.strptime(temp_metadata['start_time'],
+                                                    "%Y-%m-%d %H:%M:%S")
+    temp_metadata['end_time'] = datetime.strptime(temp_metadata['end_time'],
+                                                  "%Y-%m-%d %H:%M:%S")
+    return temp_metadata
+
+
 def list_of_meetings(bot, update):
     user = update.message.from_user
     add_user_message(update)
@@ -28,7 +46,7 @@ def list_of_meetings(bot, update):
         'location': None,
         'workspace': None,
     }
-    update_user_message_text(update, json.dumps(temp_metadata))
+    serialize_to_mess(update, json.dumps(temp_metadata))
     logger.info("required list of meetings from %s", user.first_name)
 
     reply_keyboard = [['No Filter'],
@@ -54,8 +72,7 @@ def filter_by_participants_apply(bot, update):
     usernames = update.message.text.lower().strip().split()
     logger.info("got participants to filter on from %s: %s",
                 user.first_name, update.message.text)
-    last_mess = last_message(user.id).text
-    temp_metadata = json.load(last_mess)
+    temp_metadata = unserialize_from_last(user)
     participants = []
     for username in usernames:
         username = username[1:] if username.startswith('@') else username
@@ -68,7 +85,7 @@ def filter_by_participants_apply(bot, update):
             participants.append(user)
 
     temp_metadata['participants'].extend(participants)
-    update_user_message_text(update, json.dumps(temp_metadata))
+    serialize_to_mess(update, temp_metadata)
 
     reply_keyboard = [['No, get meetings'],
                       ['Filter by time from', 'Filter by time to'],
@@ -90,10 +107,12 @@ def filter_by_time_from_get(bot, update):
 def filter_by_time_from_apply(bot, update):
     user = update.message.from_user
     start_time = dt_parser.parse(update.message.text.lower().strip())
-    last_mess = last_message(user.id).text
-    temp_metadata = json.load(last_mess)
-    temp_metadata['start_time'] = start_time
-    update_user_message_text(update, json.dumps(temp_metadata))
+    temp_metadata = unserialize_from_last(user)
+    reply_text = "I don't understand this time, try one more time"
+    if start_time is not None:
+        temp_metadata['start_time'] = start_time
+        serialize_to_mess(update, temp_metadata)
+        reply_text = 'Do you need to apply another filter?'
 
     logger.info("got time filter from %s: since %s", user.first_name, update.message.text)
 
@@ -102,7 +121,7 @@ def filter_by_time_from_apply(bot, update):
                       ['Filter by location', 'Filter by workspace']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
     update.message.reply_text(
-        'Do you need to apply another filter?', reply_markup=reply_markup)
+        reply_text, reply_markup=reply_markup)
     return LIST_OF_MEETINGS
 
 
@@ -117,10 +136,11 @@ def filter_by_time_to_get(bot, update):
 def filter_by_time_to_apply(bot, update):
     user = update.message.from_user
     end_time = dt_parser.parse(update.message.text.lower().strip())
-    last_mess = last_message(user.id).text
-    temp_metadata = json.load(last_mess)
-    temp_metadata['end_time'] = end_time
-    update_user_message_text(update, json.dumps(temp_metadata))
+    temp_metadata = unserialize_from_last(user)
+    reply_text = "I don't understand this time, try one more time"
+    if end_time is not None:
+        temp_metadata['end_time'] = end_time
+        serialize_to_mess(update, temp_metadata)
 
     logger.info("got time filter from %s: until %s", user.first_name, update.message.text)
 
@@ -135,8 +155,7 @@ def filter_by_time_to_apply(bot, update):
 
 def filter_by_location_get(bot, update):
     user = update.message.from_user
-    last_mess = last_message(user.id).text
-    temp_metadata = json.load(last_mess)
+    temp_metadata = unserialize_from_last(user)
 
     logger.info("required filter by location from %s", user.first_name)
     if temp_metadata['workspace'] is None:
@@ -158,10 +177,9 @@ def filter_by_location_get(bot, update):
 def filter_by_location_apply(bot, update):
     user = update.message.from_user
     location = update.message.text.lower().strip()
-    last_mess = last_message(user.id).text
-    temp_metadata = json.load(last_mess)
+    temp_metadata = unserialize_from_last(user)
     temp_metadata['location'] = location
-    update_user_message_text(update, json.dumps(temp_metadata))
+    serialize_to_mess(update, temp_metadata)
 
     logger.info("got location filter from %s: %s", user.first_name, update.message.text)
 
@@ -185,10 +203,9 @@ def filter_by_workspace_get(bot, update):
 def filter_by_workspace_apply(bot, update):
     user = update.message.from_user
     workspace = update.message.text.lower().strip()
-    last_mess = last_message(user.id).text
-    temp_metadata = json.load(last_mess)
+    temp_metadata = unserialize_from_last(user)
     temp_metadata['workspace'] = workspace
-    update_user_message_text(update, json.dumps(temp_metadata))
+    serialize_to_mess(update, temp_metadata)
 
     logger.info("got workspace filter from %s: %s", user.first_name, update.message.text)
 
@@ -203,8 +220,7 @@ def filter_by_workspace_apply(bot, update):
 
 def get_filtered(bot, update):
     user = update.message.from_user
-    last_mess = last_message(user.id).text
-    filters = json.load(last_mess)
+    filters = unserialize_from_last(user)
 
     with db_session:
         filtered = meet_ids_in_time(filters['start_time'], filters['end_time'])
