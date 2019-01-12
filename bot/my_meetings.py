@@ -28,7 +28,7 @@ def serialize_to_mess(update, temp_metadata):
 
 def unserialize_from_last(user):
     last_mess = last_message(user.id).text
-    temp_metadata = json.load(last_mess)
+    temp_metadata = json.loads(last_mess.replace("'", "\""))
     temp_metadata['start_time'] = datetime.strptime(temp_metadata['start_time'],
                                                     "%Y-%m-%d %H:%M:%S")
     temp_metadata['end_time'] = datetime.strptime(temp_metadata['end_time'],
@@ -46,7 +46,7 @@ def list_of_meetings(bot, update):
         'location': None,
         'workspace': None,
     }
-    serialize_to_mess(update, json.dumps(temp_metadata))
+    serialize_to_mess(update, temp_metadata)
     logger.info("required list of meetings from %s", user.first_name)
 
     reply_keyboard = [['No Filter'],
@@ -82,7 +82,7 @@ def filter_by_participants_apply(bot, update):
             update.message.reply_text(
                 'Sorry, user %s does not exist, I will ignore it' % username)
         else:
-            participants.append(user)
+            participants.append(user.username)
 
     temp_metadata['participants'].extend(participants)
     serialize_to_mess(update, temp_metadata)
@@ -223,8 +223,10 @@ def get_filtered(bot, update):
     filters = unserialize_from_last(user)
 
     with db_session:
-        filtered = meet_ids_in_time(filters['start_time'], filters['end_time'])
+        dt_start, dt_end = filters['start_time'], filters['end_time']
         participants, location, workspace = filters['participants'], filters['location'], filters['workspace']
+        filtered = meet_ids_in_time(dt_start, dt_end)
+
         if workspace is not None:
             if location is None:
                 if not isinstance(workspace, Workspace):
@@ -257,7 +259,6 @@ def get_filtered(bot, update):
         if participants is not None:
             for username in participants:
                 if not isinstance(user, User):
-                    username = username.username
                     username = username[1:] if username.startswith('@') else username
                     user = get_user_by_username(username)
                 if user is not None:
@@ -274,7 +275,7 @@ def get_filtered(bot, update):
             update.message.reply_text(format_filtered([Meeting[id] for id in filtered]))
         else:
             update.message.reply_text('nothing found')
-    reply_keyboard = [['My meetings', 'Add meeting'],
+    reply_keyboard = [['Check meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
                       ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
