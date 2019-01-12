@@ -51,6 +51,7 @@ class Workspace(db.Entity):
     id = PrimaryKey(int, auto=True)
     name = Optional(str)
     users = Set(User)
+    # TODO: admins = Set(User)
     locations = Set('Location')
 
 
