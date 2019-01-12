@@ -70,7 +70,8 @@ def add_user_to_meeting(bot, update):
         else:
             update.message.reply_text(
                 f'No such user {username} in my base, so you can hold meetings with him, but he will not get any information about it')
-    update.message.reply_text('Press /done if you are, else type another @name')
+    update.message.reply_text(
+        'Press /done if you are, else type another @name or /cancel if you want to cancel meeting')
     return MEETING_USERS
 
 

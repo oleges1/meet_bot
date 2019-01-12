@@ -11,26 +11,25 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, CallbackQuery
 from selects import *
 from bot.states import *
 from dateutil import parser as dt_parser
+import json
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-participants = list()
-time = [None, None]
-location = None
-workspace = None
-
 
 def list_of_meetings(bot, update):
     user = update.message.from_user
     add_user_message(update)
+    temp_metadata = {
+        'participants': [],
+        'start_time': dt_parser.parse('1999-01-01 00:00'),
+        'end_time': dt_parser.parse('2031-01-01 00:00'),
+        'location': None,
+        'workspace': None,
+    }
+    update_user_message_text(update, json.dumps(temp_metadata))
     logger.info("required list of meetings from %s", user.first_name)
-    global participants, time, location, workspace
-    participants = list()
-    time = [None, None]
-    location = None
-    workspace = None
 
     reply_keyboard = [['No Filter'],
                       ['Filter by time from', 'Filter by time to'],
@@ -44,7 +43,6 @@ def list_of_meetings(bot, update):
 
 def filter_by_participants_get(bot, update):
     user = update.message.from_user
-    add_user_message(update)
     logger.info("required filter by participants from %s", user.first_name)
     update.message.reply_text(
         'Send users who must be in meeting, format: "username1 username2 ..."')
@@ -54,24 +52,23 @@ def filter_by_participants_get(bot, update):
 def filter_by_participants_apply(bot, update):
     user = update.message.from_user
     usernames = update.message.text.lower().strip().split()
-    add_user_message(update)
     logger.info("got participants to filter on from %s: %s",
                 user.first_name, update.message.text)
-
-    global participants
+    last_mess = last_message(user.id).text
+    temp_metadata = json.load(last_mess)
     participants = []
-
-    all_users_exist = True
     for username in usernames:
         username = username[1:] if username.startswith('@') else username
         user = get_user_by_username(username)
         if user == None:
             logger.info("user %s does not exist", username)
             update.message.reply_text(
-                'Sorry, user %s does not exist' % username)
-            all_users_exist = False
+                'Sorry, user %s does not exist, I will ignore it' % username)
         else:
             participants.append(user)
+
+    temp_metadata['participants'].extend(participants)
+    update_user_message_text(update, json.dumps(temp_metadata))
 
     reply_keyboard = [['No, get meetings'],
                       ['Filter by time from', 'Filter by time to'],
@@ -84,7 +81,6 @@ def filter_by_participants_apply(bot, update):
 
 def filter_by_time_from_get(bot, update):
     user = update.message.from_user
-    add_user_message(update)
     logger.info("required filter by time from %s", user.first_name)
     update.message.reply_text(
         'Send time all meetings should be after.')
@@ -93,9 +89,12 @@ def filter_by_time_from_get(bot, update):
 
 def filter_by_time_from_apply(bot, update):
     user = update.message.from_user
-    global time
-    time[0] = dt_parser.parse(update.message.text.lower().strip())
-    add_user_message(update)
+    start_time = dt_parser.parse(update.message.text.lower().strip())
+    last_mess = last_message(user.id).text
+    temp_metadata = json.load(last_mess)
+    temp_metadata['start_time'] = start_time
+    update_user_message_text(update, json.dumps(temp_metadata))
+
     logger.info("got time filter from %s: since %s", user.first_name, update.message.text)
 
     reply_keyboard = [['No, get meetings'],
@@ -109,7 +108,6 @@ def filter_by_time_from_apply(bot, update):
 
 def filter_by_time_to_get(bot, update):
     user = update.message.from_user
-    add_user_message(update)
     logger.info("required filter by time from %s", user.first_name)
     update.message.reply_text(
         'Send time all meetings should be before.')
@@ -118,9 +116,12 @@ def filter_by_time_to_get(bot, update):
 
 def filter_by_time_to_apply(bot, update):
     user = update.message.from_user
-    global time
-    time[1] = dt_parser.parse(update.message.text.lower().strip())
-    add_user_message(update)
+    end_time = dt_parser.parse(update.message.text.lower().strip())
+    last_mess = last_message(user.id).text
+    temp_metadata = json.load(last_mess)
+    temp_metadata['end_time'] = end_time
+    update_user_message_text(update, json.dumps(temp_metadata))
+
     logger.info("got time filter from %s: until %s", user.first_name, update.message.text)
 
     reply_keyboard = [['No, get meetings'],
@@ -134,10 +135,11 @@ def filter_by_time_to_apply(bot, update):
 
 def filter_by_location_get(bot, update):
     user = update.message.from_user
-    add_user_message(update)
+    last_mess = last_message(user.id).text
+    temp_metadata = json.load(last_mess)
+
     logger.info("required filter by location from %s", user.first_name)
-    global workspace
-    if workspace == None:
+    if temp_metadata['workspace'] is None:
         update.message.reply_text(
             'Before filtering by location, please, filter by workspace!')
         reply_keyboard = [['No Filter'],
@@ -155,9 +157,12 @@ def filter_by_location_get(bot, update):
 
 def filter_by_location_apply(bot, update):
     user = update.message.from_user
-    global location
     location = update.message.text.lower().strip()
-    add_user_message(update)
+    last_mess = last_message(user.id).text
+    temp_metadata = json.load(last_mess)
+    temp_metadata['location'] = location
+    update_user_message_text(update, json.dumps(temp_metadata))
+
     logger.info("got location filter from %s: %s", user.first_name, update.message.text)
 
     reply_keyboard = [['No, get meetings'],
@@ -171,7 +176,6 @@ def filter_by_location_apply(bot, update):
 
 def filter_by_workspace_get(bot, update):
     user = update.message.from_user
-    add_user_message(update)
     logger.info("required filter by workspace from %s", user.first_name)
     update.message.reply_text(
         'Send workspace at which meeting could held')
@@ -180,9 +184,12 @@ def filter_by_workspace_get(bot, update):
 
 def filter_by_workspace_apply(bot, update):
     user = update.message.from_user
-    global workspace
     workspace = update.message.text.lower().strip()
-    add_user_message(update)
+    last_mess = last_message(user.id).text
+    temp_metadata = json.load(last_mess)
+    temp_metadata['workspace'] = workspace
+    update_user_message_text(update, json.dumps(temp_metadata))
+
     logger.info("got workspace filter from %s: %s", user.first_name, update.message.text)
 
     reply_keyboard = [['No, get meetings'],
@@ -196,14 +203,12 @@ def filter_by_workspace_apply(bot, update):
 
 def get_filtered(bot, update):
     user = update.message.from_user
-    global participants, time, location, workspace
+    last_mess = last_message(user.id).text
+    filters = json.load(last_mess)
+
     with db_session:
-        dt_start, dt_end = time[0], time[1]
-        if dt_start is None:
-            dt_start = dt_parser.parse('1999-01-01 00:00')
-        if dt_end is None:
-            dt_end = dt_parser.parse('2030-01-01 00:00')
-        filtered = meet_ids_in_time(dt_start, dt_end)
+        filtered = meet_ids_in_time(filters['start_time'], filters['end_time'])
+        participants, location, workspace = filters['participants'], filters['location'], filters['workspace']
         if workspace is not None:
             if location is None:
                 if not isinstance(workspace, Workspace):
@@ -253,7 +258,7 @@ def get_filtered(bot, update):
             update.message.reply_text(format_filtered([Meeting[id] for id in filtered]))
         else:
             update.message.reply_text('nothing found')
-    reply_keyboard = [['Check meetings', 'Add meeting'],
+    reply_keyboard = [['My meetings', 'Add meeting'],
                       ['Add workspace', 'Add location'],
                       ['Cancel meeting']]
     reply_markup = ReplyKeyboardMarkup(reply_keyboard)
